@@ -1,0 +1,34 @@
+{
+  "name": "dk-cpp",
+  "version": "1.0.0",
+  "description": "A C++ IDE designed for easy use.",
+  "main": "app.js",
+  "author": {
+    "name": "EntityPlantt"
+  },
+  "scripts": {
+    "test": "electron .",
+    "build": "npx electron-packager . \"DK-C++\" --icon=icon.ico",
+    "installer": "node installer.js"
+  },
+  "tags": [
+    "ide",
+    "compiler",
+    "c++",
+    "cpp",
+    "g++",
+    "gnu",
+    "mingw",
+    "gcc",
+    "gnu-gcc"
+  ],
+  "dependencies": {
+    "electron": "^19.0.8"
+  },
+  "devDependencies": {
+    "ace-builds": "^1.7.1",
+    "electron": "^19.0.8",
+    "electron-packager": "^15.5.1",
+    "electron-winstaller": "^5.0.0"
+  }
+}

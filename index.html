@@ -1,0 +1,110 @@
+﻿<!DOCTYPE html>
+<html lang="en" xmlns="http://www.w3.org/1999/xhtml">
+<head>
+	<meta charset="utf-8" />
+	<title>DK-C++</title>
+	<style>
+        body {
+            margin: 0;
+            overflow: hidden;
+            background: black;
+        }
+        #main {
+            width: calc(100vw - 312px);
+            height: 100vh;
+            overflow: auto;
+        }
+        #toolbar {
+            z-index: 1;
+            position: fixed;
+            bottom: 0;
+            right: 0;
+            height: 50px;
+            border-collapse: collapse;
+            background: #222;
+            border-spacing: 0;
+        }
+        #toolbar > tbody > tr > td {
+            width: 50px;
+            height: 50px;
+            cursor: pointer;
+        }
+        #toolbar > tbody > tr > td > svg > path {
+            fill: white;
+        }
+        #toolbar > tbody > tr > td:hover {
+            background: #0008;
+        }
+        #debug {
+            width: 312px;
+            height: calc(100vh - 54px);
+            position: absolute;
+            top: 0;
+            right: 0;
+            z-index: 1;
+            background: #121212;
+            font: 12px monospace;
+            word-wrap: break-word;
+            color: white;
+        }
+        #debug.error {
+            background: darkred;
+        }
+        ::-webkit-scrollbar {
+            width: 10px;
+            height: 10px;
+        }
+        ::-webkit-scrollbar-track, ::-webkit-scrollbar-corner {
+            background: #333;
+        }
+        ::-webkit-scrollbar-thumb {
+            background: #444;
+        }
+        ::-webkit-scrollbar-thumb:hover {
+            background: #252525;
+        }
+    </style>
+    <script src="ace-builds/src/ace.js"></script>
+    <script src="renderer.js"></script>
+</head>
+<body>
+    <div id="main"></div>
+    <div id="debug"></div>
+    <table id="toolbar">
+		<tbody>
+            <tr>
+                <td onclick="openProject()">
+                    <svg xmlns="http://www.w3.org/2000/svg" height="48" width="48">
+                        <path d="M7 40q-1.15 0-2.075-.925Q4 38.15 4 37V11q0-1.15.925-2.075Q5.85 8 7 8h14.05l3 3H41q1.15 0 2.075.925Q44 12.85 44 14H22.75l-3-3H7v26l5.1-20H47l-5.35 20.7q-.3 1.2-1.1 1.75T38.5 40Zm3.15-3h28.6l4.2-17h-28.6Zm0 0 4.2-17-4.2 17ZM7 14v-3 3Z" />
+                    </svg>
+                </td>
+                <td onclick="saveProject()">
+                    <svg xmlns="http://www.w3.org/2000/svg" height="48" width="48">
+                        <path d="M42 13.85V39q0 1.2-.9 2.1-.9.9-2.1.9H9q-1.2 0-2.1-.9Q6 40.2 6 39V9q0-1.2.9-2.1Q7.8 6 9 6h25.15Zm-3 1.35L32.8 9H9v30h30ZM24 35.75q2.15 0 3.675-1.525T29.2 30.55q0-2.15-1.525-3.675T24 25.35q-2.15 0-3.675 1.525T18.8 30.55q0 2.15 1.525 3.675T24 35.75ZM11.65 18.8h17.9v-7.15h-17.9ZM9 15.2V39 9Z" />
+                    </svg>
+                </td>
+                <td onclick="saveAsProject()">
+                    <svg xmlns="http://www.w3.org/2000/svg" height="48" width="48">
+                        <path d="M9 42q-1.25 0-2.125-.875T6 39V9q0-1.25.875-2.125T9 6h25.15L42 13.85v12.9l-3 3V15.2L32.8 9H9v30h20.8l-3 3Zm15-6.25q2.15 0 3.675-1.525T29.2 30.55q0-2.15-1.525-3.675T24 25.35q-2.15 0-3.675 1.525T18.8 30.55q0 2.15 1.525 3.675T24 35.75ZM11.65 18.8h17.9v-7.15h-17.9ZM29.5 46v-2.5l11.4-11.4 2.5 2.5L32 46Zm15.2-12.7-2.5-2.5 1.95-1.95q.3-.3.525-.3.225 0 .525.3l1.35 1.35q.3.3.3.625t-.3.625ZM9 39V9v20.75Z" />
+                    </svg>
+                </td>
+				<td onclick="buildProject()">
+					<svg xmlns="http://www.w3.org/2000/svg" height="48" width="48">
+						<path d="m19.4 44-1-6.3q-.95-.35-2-.95t-1.85-1.25l-5.9 2.7L4 30l5.4-3.95q-.1-.45-.125-1.025Q9.25 24.45 9.25 24q0-.45.025-1.025T9.4 21.95L4 18l4.65-8.2 5.9 2.7q.8-.65 1.85-1.25t2-.9l1-6.35h9.2l1 6.3q.95.35 2.025.925Q32.7 11.8 33.45 12.5l5.9-2.7L44 18l-5.4 3.85q.1.5.125 1.075.025.575.025 1.075t-.025 1.05q-.025.55-.125 1.05L44 30l-4.65 8.2-5.9-2.7q-.8.65-1.825 1.275-1.025.625-2.025.925l-1 6.3ZM24 30.5q2.7 0 4.6-1.9 1.9-1.9 1.9-4.6 0-2.7-1.9-4.6-1.9-1.9-4.6-1.9-2.7 0-4.6 1.9-1.9 1.9-1.9 4.6 0 2.7 1.9 4.6 1.9 1.9 4.6 1.9Z" />
+					</svg>
+				</td>
+				<td onclick="runProject()">
+					<svg xmlns="http://www.w3.org/2000/svg" height="48" width="48">
+						<path d="M19.15 32.5 32.5 24l-13.35-8.5ZM24 44q-4.1 0-7.75-1.575-3.65-1.575-6.375-4.3-2.725-2.725-4.3-6.375Q4 28.1 4 24q0-4.15 1.575-7.8 1.575-3.65 4.3-6.35 2.725-2.7 6.375-4.275Q19.9 4 24 4q4.15 0 7.8 1.575 3.65 1.575 6.35 4.275 2.7 2.7 4.275 6.35Q44 19.85 44 24q0 4.1-1.575 7.75-1.575 3.65-4.275 6.375t-6.35 4.3Q28.15 44 24 44Z" />
+					</svg>
+				</td>
+                <td onclick="buildAndRunProject()">
+                    <svg xmlns="http://www.w3.org/2000/svg" height="48" width="48">
+                        <path d="m37.65 17.8-2.2-4.7-4.7-2.2 4.7-2.2 2.2-4.7 2.2 4.7 4.7 2.2-4.7 2.2Zm4.2 14.45-1.5-3.15-3.15-1.5 3.15-1.5 1.5-3.15 1.5 3.15 3.15 1.5-3.15 1.5ZM15.7 44l-.5-4.6q-.7-.1-1.45-.45t-1.3-.85l-3.9 1.65-4.4-7.2 3.8-2.5q-.25-.85-.25-1.5t.25-1.5l-3.8-2.5 4.4-7.2 3.9 1.65q.55-.5 1.3-.85t1.45-.45l.5-4.6h8.4l.5 4.6q.7.1 1.45.45t1.3.85l3.9-1.65 4.4 7.2-3.8 2.5q.25.85.25 1.5t-.25 1.5l3.8 2.5-4.4 7.2-3.9-1.65q-.55.5-1.3.85t-1.45.45l-.5 4.6Zm4.2-9.7q2.5 0 4.125-1.625t1.625-4.125q0-2.5-1.625-4.125T19.9 22.8q-2.5 0-4.125 1.625T14.15 28.55q0 2.5 1.625 4.125T19.9 34.3Z" />
+                    </svg>
+                </td>
+			</tr>
+		</tbody>
+	</table>
+</body>
+</html>
