@@ -53,10 +53,36 @@ onload = () => {
         "enableSnippets": true,
         "fontSize": "12pt"
     });
-    onkeypress = event => {
-        if (event.key == "\x13") {
+    onkeydown = event => {
+        if (event.ctrlKey) {
             event.preventDefault();
-            saveProject();
+            if (event.key.toLowerCase() == "s") {
+                if (event.shiftKey) {
+                    saveAsProject();
+                }
+                else {
+                    saveProject();
+                }
+            }
+            else if (event.key.toLowerCase() == "b") {
+                if (event.shiftKey) {
+                    buildAndRunProject();
+                }
+                else {
+                    buildProject();
+                }
+            }
+            else if (event.key.toLowerCase() == "r") {
+                if (event.shiftKey) {
+                    buildAndRunProject();
+                }
+                else {
+                    runProject();
+                }
+            }
+            else if (event.key.toLowerCase() == "o") {
+                openProject();
+            }
         }
     }
     sendOverBridge("editorValue", () => editor.getValue());
