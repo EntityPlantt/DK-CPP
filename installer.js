@@ -12,7 +12,7 @@ const { join } = require("path");
             setupIcon: join(__dirname, "icon.ico"),
             setupExe: "DK-C++ Setup.exe",
             setupMsi: "DK-C++ Windows Setup.msi",
-            version: "1.0.0"
+            version: "1.0.1"
         });
         console.log("Created MSI installer");
     }
