@@ -77,12 +77,7 @@ onload = () => {
                     }
                     break;
                 case "r":
-                    if (event.shiftKey) {
-                        buildAndRunProject();
-                    }
-                    else {
-                        runProject();
-                    }
+                    runProject();
                     break;
                 case "o":
                     openProject();
