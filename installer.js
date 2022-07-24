@@ -11,8 +11,7 @@ const { join } = require("path");
             iconUrl: join(__dirname, "icon.ico"),
             setupIcon: join(__dirname, "icon.ico"),
             setupExe: "DK-C++ Setup.exe",
-            setupMsi: "DK-C++ Windows Setup.msi",
-            version: "1.0.1"
+            setupMsi: "DK-C++ Windows Setup.msi"
         });
         console.log("Created MSI installer");
     }
