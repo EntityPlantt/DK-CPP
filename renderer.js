@@ -55,33 +55,38 @@ onload = () => {
     });
     onkeydown = event => {
         if (event.ctrlKey) {
-            event.preventDefault();
-            if (event.key.toLowerCase() == "s") {
-                if (event.shiftKey) {
-                    saveAsProject();
-                }
-                else {
-                    saveProject();
-                }
+            const keys = ["s", "b", "r", "o", "w"];
+            if (keys.includes(event.key)) {
+                event.preventDefault();
             }
-            else if (event.key.toLowerCase() == "b") {
-                if (event.shiftKey) {
-                    buildAndRunProject();
-                }
-                else {
-                    buildProject();
-                }
-            }
-            else if (event.key.toLowerCase() == "r") {
-                if (event.shiftKey) {
-                    buildAndRunProject();
-                }
-                else {
-                    runProject();
-                }
-            }
-            else if (event.key.toLowerCase() == "o") {
-                openProject();
+            switch (event.key.toLowerCase()) {
+                case "s":
+                    if (event.shiftKey) {
+                        saveAsProject();
+                    }
+                    else {
+                        saveProject();
+                    }
+                    break;
+                case "b":
+                    if (event.shiftKey) {
+                        buildAndRunProject();
+                    }
+                    else {
+                        buildProject();
+                    }
+                    break;
+                case "r":
+                    if (event.shiftKey) {
+                        buildAndRunProject();
+                    }
+                    else {
+                        runProject();
+                    }
+                    break;
+                case "o":
+                    openProject();
+                    break;
             }
         }
     }
