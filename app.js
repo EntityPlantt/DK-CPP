@@ -37,25 +37,45 @@ app.on("window-all-closed", () => {
 ipcMain.on("show-open-dialog", (event, filePath) => {
 	var path = dialog.showOpenDialogSync(window, {
 		defaultPath: filePath,
-		title: "Edit C++ Source",
+		title: "Edit C++ File",
 		buttonLabel: "Edit",
-		filters: [{
-			name: "C++ Source",
-			extensions: ["cpp", "cxx", "c++"]
-		}]
+		filters: [
+			{
+				name: "C++ Source",
+				extensions: ["cpp", "cxx", "c++"]
+			},
+			{
+				name: "C++ Header",
+				extensions: ["h", "hpp"]
+			},
+			{
+				name: "Any file",
+				extensions: ["*"]
+			}
+		]
 	});
 	event.reply("collect-open-dialog", path ? path[0] : path);
 });
 ipcMain.on("show-save-dialog", (event, filePath) => {
 	var result = dialog.showSaveDialogSync(window, {
 		defaultPath: filePath,
-		title: "Save C++ Source",
+		title: "Save C++ File",
 		icon: "icon.ico",
 		buttonLabel: "Save",
-		filters: [{
-			name: "C++ Source",
-			extensions: ["cpp", "cxx", "c++"]
-		}]
+		filters: [
+			{
+				name: "C++ Source",
+				extensions: ["cpp", "cxx", "c++"]
+			},
+			{
+				name: "C++ Header",
+				extensions: ["h", "hpp"]
+            },
+			{
+				name: "Any file",
+				extensions: ["*"]
+            }
+		]
 	});
 	event.reply("collect-save-dialog", result);
 });
