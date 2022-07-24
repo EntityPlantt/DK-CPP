@@ -88,7 +88,7 @@ onload = () => {
     sendOverBridge("editorValue", () => editor.getValue());
     sendOverBridge("setEditorValue", data => editor.session.setValue(data));
     sendOverBridge("setBuildLog", text => {
-        document.getElementById("debug").innerHTML = text;
+        document.getElementById("debug").innerText = text;
     });
     sendOverBridge("setBuildLogError", enabled => {
         if (enabled) {
@@ -98,6 +98,6 @@ onload = () => {
             document.getElementById("debug").classList.remove("error");
         }
     });
-    sendOverBridge("getBuildLog", () => document.getElementById("debug").innerHTML);
+    sendOverBridge("getBuildLog", () => document.getElementById("debug").innerText);
     loadCallback();
 }
