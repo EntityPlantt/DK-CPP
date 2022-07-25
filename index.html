@@ -11,8 +11,8 @@
             background: black;
         }
         #main {
-            width: calc(100vw - 312px);
-            height: 100vh;
+            width: calc(100vw / var(--zoom) - 312px);
+            height: calc(100vh / var(--zoom));
             overflow: auto;
         }
         #toolbar {
@@ -38,7 +38,7 @@
         }
         #debug {
             width: 312px;
-            height: calc(100vh - 54px);
+            height: calc(100vh / var(--zoom) - 54px);
             position: absolute;
             top: 0;
             right: 0;
@@ -52,8 +52,8 @@
             background: darkred;
         }
         ::-webkit-scrollbar {
-            width: 10px;
-            height: 10px;
+            width: calc(10px * var(--zoom));
+            height: calc(10px * var(--zoom));
         }
         ::-webkit-scrollbar-track, ::-webkit-scrollbar-corner {
             background: #333;
