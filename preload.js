@@ -70,62 +70,21 @@ function buildProject() {
 	saveProject();
 	var buildUUID = randomUUID();
 	return new Promise(ret => {
-		exec(`mkdir "${join(__dirname, "build-" + buildUUID)}"`, (error, stdout, stderr) => {
+		exec(`g++ "${filePath}" -o "${filePath.substr(0, filePath.lastIndexOf("."))}.exe"`, (error, stdout, stderr) => {
 			if (error) {
 				exposedVariables.setBuildLog(stderr);
-				exposedVariables.setBuildLogError(true);
-				ret(false);
 			}
 			else {
-				exposedVariables.setBuildLog(stdout);
-				exposedVariables.setBuildLogError(false);
-				exec(`g++ "${filePath}" -o "${join(__dirname, "build-" + buildUUID, "program.exe")}"`, (error, stdout, stderr) => {
-					if (error) {
-						exposedVariables.setBuildLog(stderr);
-						exposedVariables.setBuildLogError(true);
-						ret(false);
-					}
-					else {
-						exposedVariables.setBuildLog(exposedVariables.getBuildLog() + "\n" + stdout);
-						readFile(join(__dirname, "build-" + buildUUID, "program.exe"), null, (error, data) => {
-							if (error) {
-								exposedVariables.setBuildLog(error);
-								exposedVariables.setBuildLogError(true);
-								ret(false);
-							}
-							else {
-								writeFile(join(filePath, "..", "built.exe"), data, error => {
-									if (error) {
-										exposedVariables.setBuildLog(error);
-										exposedVariables.setBuildLogError(true);
-										ret(false);
-									}
-									else {
-										exec(`rmdir /s /q "${join(__dirname, "build-" + buildUUID)}"`, (error, stdout, stderr) => {
-											if (error) {
-												exposedVariables.setBuildLog(stderr);
-												exposedVariables.setBuildLogError(true);
-												ret(false);
-											}
-											else {
-												exposedVariables.setBuildLog(`${exposedVariables.getBuildLog()}
-\n${stdout}\nProject successfully built\nfile: ${join(filePath, "..", "built.exe")}`);
-												exposedVariables.setBuildLogError(false);
-												ret(true);
-											}
-										});
-									}
-								});
-							}
-						});
-					}
-				});
-			}
+				exposedVariables.setBuildLog(`${stdout}\nProject successfully built file:
+${filePath.substr(0, filePath.lastIndexOf(".")) + ".exe"}`);
+            }
+			exposedVariables.setBuildLogError(Boolean(error));
+			ret(!error);
 		});
 	});
 }
 function runProject() {
-	writeFile(join(__dirname, "run.bat"), `call "${join(filePath, "..", "built.exe")}"\npause\nexit`, err => {
+	writeFile(join(__dirname, "run.bat"), `call "${filePath.substr(0, filePath.lastIndexOf(".")) + ".exe"}"\npause\nexit`, err => {
 		if (err) {
 			exposedVariables.setBuildLog(err);
 			exposedVariables.setBuildLogError(true);
@@ -145,7 +104,7 @@ function runProject() {
 								exposedVariables.setBuildLogError(true);
 							}
 							else {
-								exposedVariables.setBuildLog("Ran " + join(filePath, "..", "built.exe"));
+								exposedVariables.setBuildLog(`Ran program:\n${filePath.substr(0, filePath.lastIndexOf("."))}.exe`);
 								exposedVariables.setBuildLogError(false);
 							}
 						});
@@ -158,7 +117,7 @@ function runProject() {
 							exposedVariables.setBuildLogError(true);
 						}
 						else {
-							exposedVariables.setBuildLog("Ran " + join(filePath, "..", "built.exe"));
+							exposedVariables.setBuildLog(`Ran program:\n${filePath.substr(0, filePath.lastIndexOf("."))}.exe`);
 							exposedVariables.setBuildLogError(false);
 						}
 					});
