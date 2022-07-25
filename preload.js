@@ -168,9 +168,7 @@ function runProject() {
     });
 }
 async function buildAndRunProject() {
-	console.log("A");
 	if (await buildProject()) {
-		console.log("B");
 		runProject();
     }
 }
