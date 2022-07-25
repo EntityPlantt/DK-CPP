@@ -6,6 +6,7 @@
   "author": {
     "name": "EntityPlantt"
   },
+  "license": "SEE LICENSE IN LICENSE.md",
   "scripts": {
     "test": "electron .",
     "build": "npx electron-packager . \"DK-C++\" --icon=icon.ico",
