@@ -68,15 +68,16 @@ function loadCallback() {
 }
 function buildProject() {
 	saveProject();
-	var buildUUID = randomUUID();
 	return new Promise(ret => {
 		exec(`g++ "${filePath}" -o "${filePath.substr(0, filePath.lastIndexOf("."))}.exe"`, (error, stdout, stderr) => {
 			if (error) {
 				exposedVariables.setBuildLog(stderr);
+				exposedVariables.updateErrors(filePath);
 			}
 			else {
 				exposedVariables.setBuildLog(`${stdout}\nProject successfully built file:
 ${filePath.substr(0, filePath.lastIndexOf(".")) + ".exe"}`);
+				exposedVariables.clearErrors();
             }
 			exposedVariables.setBuildLogError(Boolean(error));
 			ret(!error);
