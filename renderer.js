@@ -38,7 +38,7 @@ onload = () => {
         "firstLineNumber": 1,
         "overwrite": false,
         "newLineMode": "auto",
-        "useWorker": true,
+        "useWorker": false,
         "useSoftTabs": true,
         "navigateWithinSoftTabs": false,
         "tabSize": 4,
@@ -115,6 +115,8 @@ onload = () => {
         }
     });
     sendOverBridge("getBuildLog", () => document.getElementById("debug").innerText);
+    sendOverBridge("updateErrors", updateErrors);
+    sendOverBridge("clearErrors", () => editor.session.clearAnnotations());
     loadCallback();
 }
 function updateZoom() {
@@ -125,4 +127,35 @@ function updateZoom() {
         elm.setAttribute("width", Math.floor(48 * zoom));
         elm.setAttribute("height", Math.floor(48 * zoom));
     });
+}
+function updateErrors(filePath) {
+    var log = document.getElementById("debug").innerText, row, column, annotations = [], type, text;
+    while (/\:\d+\:\d+/m.test(log)) {
+        log = log.substr(log.search(/\:\d+\:\d+/m) + 1);
+        row = column = 0;
+        while (log[0] != ":") {
+            row *= 10;
+            row += parseInt(log[0]);
+            log = log.substr(1);
+        }
+        log = log.substr(1);
+        while (log[0] != ":") {
+            column *= 10;
+            column += parseInt(log[0]);
+            log = log.substr(1);
+        }
+        log = log.substr(2);
+        type = {
+            error: "error",
+            warning: "warning",
+            note: "info"
+        }[log.substr(0, log.indexOf(":"))];
+        text = log.substr(0, log.indexOf("\n"));
+        log = log.substr(log.indexOf("\n"));
+        row--;
+        if (row.toString() !== "NaN" && column.toString() !== "NaN") {
+            annotations.push({row, column, type, text});
+        }
+    }
+    editor.session.setAnnotations(annotations);
 }
