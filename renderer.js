@@ -1,4 +1,4 @@
-var zoom, innerWidthComputed, innerHeightComputed;
+var zoom;
 onload = () => {
     zoom = parseInt(localStorage.getItem("app-settings-zoom")) || 1;
     updateZoom();
@@ -54,7 +54,7 @@ onload = () => {
         "enableEmmet": true,
         "enableBasicAutocompletion": true,
         "enableSnippets": true,
-        "fontSize": "12pt"
+        "fontSize": "calc(12pt * var(--zoom))"
     });
     onkeydown = event => {
         if (event.ctrlKey) {
@@ -118,9 +118,11 @@ onload = () => {
     loadCallback();
 }
 function updateZoom() {
-    document.body.style = `zoom: ${zoom}; --zoom: ${zoom};`;
+    document.body.style = `--zoom: ${zoom};`;
     blur();
     localStorage.setItem("app-settings-zoom", zoom);
-    innerWidthComputed = innerWidth / zoom;
-    innerHeightComputed = innerHeight / zoom;
+    document.querySelectorAll("svg").forEach(elm => {
+        elm.setAttribute("width", Math.floor(48 * zoom));
+        elm.setAttribute("height", Math.floor(48 * zoom));
+    });
 }

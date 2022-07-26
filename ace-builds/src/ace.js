@@ -2732,8 +2732,8 @@ oop.inherits(GutterTooltip, Tooltip);
 
 (function(){
     this.setPosition = function(x, y) {
-        var windowWidth = window.innerWidthComputed;
-        var windowHeight = window.innerHeightComputed;
+        var windowWidth = window.innerWidth || document.documentElement.clientWidth;
+        var windowHeight = window.innerHeight || document.documentElement.clientHeight;
         var width = this.getWidth();
         var height = this.getHeight();
         x += 15;
