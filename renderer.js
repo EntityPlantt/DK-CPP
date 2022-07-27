@@ -116,7 +116,6 @@ onload = () => {
     });
     sendOverBridge("getBuildLog", () => document.getElementById("debug").innerText);
     sendOverBridge("updateErrors", updateErrors);
-    sendOverBridge("clearErrors", () => editor.session.clearAnnotations());
     loadCallback();
 }
 function updateZoom() {
@@ -128,7 +127,7 @@ function updateZoom() {
         elm.setAttribute("height", Math.floor(48 * zoom));
     });
 }
-function updateErrors(filePath) {
+function updateErrors() {
     var log = document.getElementById("debug").innerText, row, column, annotations = [], type, text;
     while (/\:\d+\:\d+/m.test(log)) {
         log = log.substr(log.search(/\:\d+\:\d+/m) + 1);
