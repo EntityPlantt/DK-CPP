@@ -116,7 +116,6 @@ onload = () => {
     });
     sendOverBridge("getBuildLog", () => document.getElementById("debug").innerText);
     sendOverBridge("updateErrors", updateErrors);
-    sendOverBridge("clearErrors", () => editor.session.clearAnnotations());
     loadCallback();
 }
 function updateZoom() {
@@ -158,4 +157,13 @@ function updateErrors(filePath) {
         }
     }
     editor.session.setAnnotations(annotations);
+    document.getElementById("debug").innerHTML = document.getElementById("debug").innerHTML
+        .replaceAll(/(.:.+?)(:\d+:\d+)/g, (match, p1, p2) =>
+            (p1.lastIndexOf(filePath) == p1.length - filePath.length) ? `${p1}<a href='javascript:goTo("${p2}")'>${p2}</a>` : match
+        );
+}
+function goTo(place) {
+    place = place.split(":");
+    editor.gotoLine(parseInt(place[1]), parseInt(place[2]), true);
+    editor.focus();
 }
