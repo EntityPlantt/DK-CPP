@@ -162,3 +162,8 @@ function updateErrors(filePath) {
             (p1.lastIndexOf(filePath) == p1.length - filePath.length) ? `${p1}<a href='javascript:goTo("${p2}")'>${p2}</a>` : match
         );
 }
+function goTo(place) {
+    place = place.split(":");
+    editor.gotoLine(parseInt(place[1]), parseInt(place[2]), true);
+    editor.focus();
+}
