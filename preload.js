@@ -79,7 +79,7 @@ ${filePath.substr(0, filePath.lastIndexOf(".")) + ".exe"}`);
             }
 			exposedVariables.setBuildLogError(Boolean(error));
 			ret(!error);
-			exposedVariables.updateErrors();
+			exposedVariables.updateErrors(filePath);
 		});
 	});
 }

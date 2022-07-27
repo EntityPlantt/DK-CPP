@@ -127,7 +127,7 @@ function updateZoom() {
         elm.setAttribute("height", Math.floor(48 * zoom));
     });
 }
-function updateErrors() {
+function updateErrors(filePath) {
     var log = document.getElementById("debug").innerText, row, column, annotations = [], type, text;
     while (/\:\d+\:\d+/m.test(log)) {
         log = log.substr(log.search(/\:\d+\:\d+/m) + 1);
@@ -157,4 +157,8 @@ function updateErrors() {
         }
     }
     editor.session.setAnnotations(annotations);
+    document.getElementById("debug").innerHTML = document.getElementById("debug").innerHTML
+        .replaceAll(/(.:.+?)(:\d+:\d+)/g, (match, p1, p2) =>
+            (p1.lastIndexOf(filePath) == p1.length - filePath.length) ? `${p1}<a href='javascript:goTo("${p2}")'>${p2}</a>` : match
+        );
 }
