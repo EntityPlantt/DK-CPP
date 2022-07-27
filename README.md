@@ -24,7 +24,7 @@ DK-C++ is an IDE for beginners with simple commands:
    npm i -D electron
    npm i -D electron-packager
    npm i -D electron-winstaller
-   npm run build
+   npm run package
    npm run installer
    ```
 1. Your build is in `installer/Setup.exe`.
