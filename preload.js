@@ -8,8 +8,8 @@ function saveProject() {
 	if (!filePath.length) {
 		saveAsProject();
 		return;
-    }
-	writeFile(filePath, exposedVariables.editorValue(), { encoding: "ascii" }, async (err) => {
+	}
+	writeFile(filePath, exposedVariables.editorValue(), { encoding: "utf-8" }, async (err) => {
 		if (err) {
 			await saveAsProject();
 		}
@@ -36,7 +36,7 @@ async function saveAsProject() {
 	}
 }
 function loadProject() {
-	readFile(filePath, "ascii", (err, data) => {
+	readFile(filePath, "utf-8", (err, data) => {
 		if (err) {
 			window.alert("Error while opening\nMore info in console\n[CTRL + SHIFT + I]");
 			window.console.error(err);
