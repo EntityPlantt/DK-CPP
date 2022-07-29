@@ -1,15 +1,19 @@
-const { contextBridge, dialog, ipcRenderer } = require("electron");
+const { contextBridge, ipcRenderer } = require("electron");
 const { writeFile, readFile } = require("original-fs");
 const { exec } = require("child_process");
-const { randomUUID } = require("crypto");
 const { join } = require("path");
 
-var filePath = __dirname, exposedVariables = new Object;
+var filePath = "", exposedVariables = new Object;
 function saveProject() {
+	if (!filePath.length) {
+		saveAsProject();
+		return;
+    }
 	writeFile(filePath, exposedVariables.editorValue(), { encoding: "ascii" }, async (err) => {
 		if (err) {
 			await saveAsProject();
 		}
+		return err;
 	});
 	document.title = `(Saved) ${filePath} - DK-C++`;
 	var oldFilePath = filePath;
