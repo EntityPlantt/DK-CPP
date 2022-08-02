@@ -13,7 +13,8 @@ function createWindow() {
 		webPreferences: {
 			preload: path.join(__dirname, "preload.js")
 		},
-		backgroundColor: "#0b0b0b"
+		backgroundColor: "#0b0b0b",
+		autoHideMenuBar: true
 	});
 	win.maximize();
 	win.loadFile("index.html");
