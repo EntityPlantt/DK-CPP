@@ -78,7 +78,7 @@ function buildProject() {
 				exposedVariables.setBuildLog(stderr);
 			}
 			else {
-				exposedVariables.setBuildLog(`${stdout}\nProject successfully built file:
+				exposedVariables.setBuildLog(`${stdout}${stdout.length ? "\n" : ""}Project successfully built file:
 ${filePath.substr(0, filePath.lastIndexOf(".")) + ".exe"}`);
             }
 			exposedVariables.setBuildLogError(Boolean(error));
