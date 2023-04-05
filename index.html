@@ -81,6 +81,7 @@
 			transform: translate(-50%, -50%);
 			z-index: 9999;
 			font-family: 'Franklin Gothic Medium', 'Arial Narrow', Arial, sans-serif;
+			font-size: 20px;
 			color: white;
 			background: #121212;
 			border-radius: 20px;
@@ -151,7 +152,8 @@
 		<input id="file-assoc-hxx" type="checkbox" /> <label for="file-assoc-hxx">C++ Header (<code>.hxx</code>)</label><br />
 		<input id="file-assoc-hpp" type="checkbox" checked /> <label for="file-assoc-hpp">C++ Header (<code>.hpp</code>)</label><br />
 		<input id="file-assoc-h++" type="checkbox" /> <label for="file-assoc-h++">C++ Header (<code>.h++</code>)</label><br /><br />
-		<button onclick="assocFile()">Associate</button> <button onclick="assocFile(false)">Leave everything as-is</button> <button onclick="assocFile(false, true)">Ask later</button>
+		<button onclick="assocFile()">Associate <img src="resources/run-as-admin.png" height="18" /></button> <button onclick="assocFile(false)">Leave everything as-is</button> <button onclick="assocFile(false, true)">Ask later</button>
+		<br /><br /><i>Known bugs: Actually clicking on the file doesn't work, this is just system association. To open files with double click, manually set this program to open the file types you want to.</i>
 	</div>
 </body>
 </html>
