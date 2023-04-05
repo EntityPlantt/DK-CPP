@@ -1,8 +1,5 @@
-const { contextBridge, ipcRenderer } = require("electron");
-const { writeFile, readFile } = require("original-fs");
-const { exec } = require("child_process");
-const { join } = require("path");
-
+const { contextBridge, ipcRenderer } = require("electron"), { writeFile, readFile, writeFileSync } = require("fs"),
+	{ exec } = require("child_process"), { join } = require("path");
 var filePath = "", exposedVariables = new Object;
 function saveProject() {
 	if (!filePath.length) {
@@ -55,7 +52,7 @@ async function openProject() {
 	if (path) {
 		filePath = path;
 		loadProject();
-    }
+	}
 }
 function loadCallback() {
 	exec("g++ --version", (error, stdout, stderr) => {
@@ -67,8 +64,18 @@ function loadCallback() {
 		else {
 			exposedVariables.setBuildLog(stdout);
 			exposedVariables.setBuildLogError(false);
-        }
-    });
+		}
+	});
+	if (!localStorage.getItem("file-assoc-done")) {
+		document.getElementById("file-assoc").style.display = "";
+	}
+	for (var arg of ipcRenderer.sendSync("get-process-argv").slice(1)) {
+		if (/^[a-z]:[\\/][^?&*:|<>"]*$/gui.test(arg)) {
+			filePath = arg;
+			loadProject();
+			break;
+		}
+	}
 }
 function buildProject() {
 	saveProject();
@@ -80,7 +87,7 @@ function buildProject() {
 			else {
 				exposedVariables.setBuildLog(`${stdout}${stdout.length ? "\n" : ""}Project successfully built file:
 ${filePath.substr(0, filePath.lastIndexOf(".")) + ".exe"}`);
-            }
+			}
 			exposedVariables.setBuildLogError(Boolean(error));
 			ret(!error);
 			exposedVariables.updateErrors(filePath);
@@ -128,12 +135,49 @@ function runProject() {
 				}
 			});
 		}
-    });
+	});
 }
 async function buildAndRunProject() {
 	if (await buildProject()) {
 		runProject();
-    }
+	}
+}
+async function assocFile(changeSettings = true, askLater = false) {
+	if (changeSettings) {
+		console.log("Associating files...");
+		const exePath = ipcRenderer.sendSync("get-path", "exe");
+		const cfiles = [], cheaders = [], ftypeCmd = [`ftype DK-CPP.CFile="${exePath}" "%1"`, `ftype DK-CPP.Header="${exePath}" "%1"`];
+		if (document.getElementById("file-assoc-cpp").checked) cfiles.push("cpp");
+		if (document.getElementById("file-assoc-cxx").checked) cfiles.push("cxx");
+		if (document.getElementById("file-assoc-c++").checked) cfiles.push("c++");
+		if (document.getElementById("file-assoc-h").checked) cheaders.push("h");
+		if (document.getElementById("file-assoc-hpp").checked) cheaders.push("hpp");
+		if (document.getElementById("file-assoc-hxx").checked) cheaders.push("hxx");
+		if (document.getElementById("file-assoc-h++").checked) cheaders.push("h++");
+		var cmd = cfiles.map(x => `assoc .${x}=DK-CPP.CFile`).concat(cheaders.map(x => `assoc .${x}=DK-CPP.Header`)).concat(ftypeCmd).join("\n");
+		try {
+			console.log(cmd);
+			const batch = join(__dirname, "assoc.bat");
+			writeFileSync(batch, cmd);
+			exec(`start "" "${join(__dirname, "elevate.exe")}" -wait "${batch}"`, async (stdout, stderr) => {
+				await exec("del " + join(__dirname, "assoc.bat"));
+				console.log("Done!");
+				exposedVariables.setBuildLog("Successfully updated file associations");
+				exposedVariables.setBuildLogError(false);
+			});
+		}
+		catch (err) {
+			window.console.error(err);
+			alert("An error occured while associating files.\nPlease open DevTools [CTRL + SHIFT + I] (or see in the console) and report the bug.");
+			exposedVariables.setBuildLog(err);
+			exposedVariables.setBuildLogError(true);
+			askLater = true;
+		}
+	}
+	if (!askLater) {
+		localStorage.setItem("file-assoc-done", true);
+	}
+	document.getElementById("file-assoc").remove();
 }
 contextBridge.exposeInMainWorld("saveProject", saveProject);
 contextBridge.exposeInMainWorld("saveAsProject", saveAsProject);
@@ -143,6 +187,7 @@ contextBridge.exposeInMainWorld("buildProject", buildProject);
 contextBridge.exposeInMainWorld("buildAndRunProject", buildAndRunProject);
 contextBridge.exposeInMainWorld("runProject", runProject);
 contextBridge.exposeInMainWorld("loadCallback", loadCallback);
+contextBridge.exposeInMainWorld("assocFile", assocFile);
 contextBridge.exposeInMainWorld("sendOverBridge", (apiKey, api) => {
 	exposedVariables[apiKey] = api;
 });

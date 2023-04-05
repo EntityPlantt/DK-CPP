@@ -1,7 +1,6 @@
 const { app, BrowserWindow, dialog } = require("electron");
 const { ipcMain } = require("electron/main");
 const path = require("path");
-
 var window;
 if (handleSquirrelEvent())
 	return;
@@ -48,7 +47,7 @@ ipcMain.on("show-open-dialog", (event, filePath) => {
 			},
 			{
 				name: "C++ Header",
-				extensions: ["h", "hpp"]
+				extensions: ["h", "hpp", "hxx", "h++"]
 			},
 			{
 				name: "Any file",
@@ -71,7 +70,7 @@ ipcMain.on("show-save-dialog", (event, filePath) => {
 			},
 			{
 				name: "C++ Header",
-				extensions: ["h", "hpp"]
+				extensions: ["h", "hpp", "hxx", "h++"]
             },
 			{
 				name: "Any file",
@@ -81,6 +80,8 @@ ipcMain.on("show-save-dialog", (event, filePath) => {
 	});
 	event.reply("collect-save-dialog", result);
 });
+ipcMain.on("get-path", (event, name) => event.returnValue = app.getPath(name));
+ipcMain.on("get-process-argv", event => event.returnValue = process.argv);
 function handleSquirrelEvent() {
 	if (process.argv.length == 1) {
 		return false;

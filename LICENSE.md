@@ -71,3 +71,8 @@ exec(`del ${join(__dirname, "run.bat")}`, (error, stdout, stderr) => {
 	}
 });
 ```
+
+## Downloaded files that aren't mine
+I have some files in this project that I've downloaded without attribution, specifically these:
+- [`elevate.exe`](https://github.com/jpassing/elevate) (MIT License)
+- [`ace-builds`](https://npm.im/ace-builds) (All rights reserved)
