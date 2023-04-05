@@ -142,5 +142,16 @@
 			</tr>
 		</tbody>
 	</table>
+	<div id="file-assoc" style="display:none">
+		(BETA) Associate DK-C++ with these file types:<br />
+		<input id="file-assoc-cpp" type="checkbox" checked /> <label for="file-assoc-cpp">C++ Source (<code>.cpp</code>)</label><br />
+		<input id="file-assoc-cxx" type="checkbox" /> <label for="file-assoc-cxx">C++ Source (<code>.cxx</code>)</label><br />
+		<input id="file-assoc-c++" type="checkbox" /> <label for="file-assoc-c++">C++ Source (<code>.c++</code>)</label><br /><br />
+		<input id="file-assoc-h" type="checkbox" checked /> <label for="file-assoc-h">C++ Header (<code>.h</code>)</label><br />
+		<input id="file-assoc-hxx" type="checkbox" /> <label for="file-assoc-hxx">C++ Header (<code>.hxx</code>)</label><br />
+		<input id="file-assoc-hpp" type="checkbox" checked /> <label for="file-assoc-hpp">C++ Header (<code>.hpp</code>)</label><br />
+		<input id="file-assoc-h++" type="checkbox" /> <label for="file-assoc-h++">C++ Header (<code>.h++</code>)</label><br /><br />
+		<button onclick="assocFile()">Associate</button> <button onclick="assocFile(false)">Leave everything as-is</button> <button onclick="assocFile(false, true)">Ask later</button>
+	</div>
 </body>
 </html>

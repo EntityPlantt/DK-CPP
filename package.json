@@ -23,7 +23,8 @@
     "gnu-gcc"
   ],
   "dependencies": {
-    "electron": "^19.0.8"
+    "electron": "^19.0.8",
+    "electron-sudo": "^4.0.12"
   },
   "devDependencies": {
     "ace-builds": "^1.7.1",

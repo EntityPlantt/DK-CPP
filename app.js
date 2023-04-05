@@ -81,6 +81,7 @@ ipcMain.on("show-save-dialog", (event, filePath) => {
 	});
 	event.reply("collect-save-dialog", result);
 });
+ipcMain.on("get-path", (event, name) => event.reply("get-path", name, app.getPath(name)));
 function handleSquirrelEvent() {
 	if (process.argv.length == 1) {
 		return false;
