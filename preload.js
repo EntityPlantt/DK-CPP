@@ -1,8 +1,5 @@
-const { writeFileSync } = require("fs");
-
-const { contextBridge, ipcRenderer } = require("electron"), { writeFile, readFile } = require("original-fs"),
+const { contextBridge, ipcRenderer } = require("electron"), { writeFile, readFile, writeFileSync } = require("fs"),
 	{ exec } = require("child_process"), { join } = require("path");
-
 var filePath = "", exposedVariables = new Object;
 function saveProject() {
 	if (!filePath.length) {
@@ -71,6 +68,13 @@ function loadCallback() {
 	});
 	if (!localStorage.getItem("file-assoc-done")) {
 		document.getElementById("file-assoc").style.display = "";
+	}
+	for (var arg of ipcRenderer.sendSync("get-process-argv").slice(1)) {
+		if (/^[a-z]:[\\/][^?&*:|<>"]*$/gui.test(arg)) {
+			filePath = arg;
+			loadProject();
+			break;
+		}
 	}
 }
 function buildProject() {
@@ -141,10 +145,7 @@ async function buildAndRunProject() {
 async function assocFile(changeSettings = true, askLater = false) {
 	if (changeSettings) {
 		console.log("Associating files...");
-		const exePath = await new Promise(ret => {
-			ipcRenderer.once("get-path", (_event, _name, path) => ret(path));
-			ipcRenderer.send("get-path", "exe");
-		});
+		const exePath = ipcRenderer.sendSync("get-path", "exe");
 		const cfiles = [], cheaders = [], ftypeCmd = [`ftype DK-CPP.CFile="${exePath}" "%1"`, `ftype DK-CPP.Header="${exePath}" "%1"`];
 		if (document.getElementById("file-assoc-cpp").checked) cfiles.push("cpp");
 		if (document.getElementById("file-assoc-cxx").checked) cfiles.push("cxx");
