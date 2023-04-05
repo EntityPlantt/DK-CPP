@@ -1,7 +1,6 @@
-const { contextBridge, ipcRenderer } = require("electron");
-const { writeFile, readFile } = require("original-fs");
-const { exec } = require("child_process");
-const { join } = require("path");
+const { contextBridge, ipcRenderer } = require("electron"), { writeFile, readFile } = require("original-fs"),
+	{ exec } = require("child_process"), { join } = require("path"),
+	sudoer = new (require("electron-sudo")).default({ name: "DK-C++" });
 
 var filePath = "", exposedVariables = new Object;
 function saveProject() {
@@ -55,7 +54,7 @@ async function openProject() {
 	if (path) {
 		filePath = path;
 		loadProject();
-    }
+	}
 }
 function loadCallback() {
 	exec("g++ --version", (error, stdout, stderr) => {
@@ -80,7 +79,7 @@ function buildProject() {
 			else {
 				exposedVariables.setBuildLog(`${stdout}${stdout.length ? "\n" : ""}Project successfully built file:
 ${filePath.substr(0, filePath.lastIndexOf(".")) + ".exe"}`);
-            }
+			}
 			exposedVariables.setBuildLogError(Boolean(error));
 			ret(!error);
 			exposedVariables.updateErrors(filePath);
@@ -128,12 +127,13 @@ function runProject() {
 				}
 			});
 		}
-    });
+	});
 }
 async function buildAndRunProject() {
 	if (await buildProject()) {
 		runProject();
-    }
+	}
+}
 }
 contextBridge.exposeInMainWorld("saveProject", saveProject);
 contextBridge.exposeInMainWorld("saveAsProject", saveAsProject);

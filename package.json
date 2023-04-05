@@ -8,10 +8,10 @@
   },
   "license": "SEE LICENSE IN LICENSE.md",
   "scripts": {
-    "test": "electron .",
     "build": "npm run -s package & npm run -s installer",
-    "package": "npx electron-packager . \"DK-C++\" --icon=icon.ico",
-    "installer": "node installer.js"
+    "installer": "node installer.js",
+    "package": "npx electron-packager . \"DK-C++\" --icon=icon.ico --overwrite",
+    "test": "electron ."
   },
   "tags": [
     "ide",

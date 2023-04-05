@@ -48,7 +48,7 @@ ipcMain.on("show-open-dialog", (event, filePath) => {
 			},
 			{
 				name: "C++ Header",
-				extensions: ["h", "hpp"]
+				extensions: ["h", "hpp", "hxx", "h++"]
 			},
 			{
 				name: "Any file",
@@ -71,7 +71,7 @@ ipcMain.on("show-save-dialog", (event, filePath) => {
 			},
 			{
 				name: "C++ Header",
-				extensions: ["h", "hpp"]
+				extensions: ["h", "hpp", "hxx", "h++"]
             },
 			{
 				name: "Any file",
