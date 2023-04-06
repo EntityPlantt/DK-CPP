@@ -30,6 +30,20 @@ const menuTemplate = [
 			{ type: "separator" },
 			{ role: "selectAll" }
 		]
+	},
+	{
+		label: "View",
+		submenu: [
+			{ label: "Zoom In", action: "zoom-in", accelerator: "CommandOrControl+=" },
+			{ label: "Zoom Out", action: "zoom-out", accelerator: "CommandOrControl+-" },
+			{ label: "Reset Zoom", action: "zoom-reset", accelerator: "CommandOrControl+0" }
+		]
+	},
+	{
+		label: "Debug",
+		submenu: [
+			{ label: "Open DevTools", accelerator: "CommandOrControl+Shift+I", click: () => window.webContents.openDevTools() }
+		]
 	}
 ];
 var window;
@@ -110,11 +124,11 @@ ipcMain.on("show-save-dialog", (event, filePath) => {
 			{
 				name: "C++ Header",
 				extensions: ["h", "hpp", "hxx", "h++"]
-            },
+			},
 			{
 				name: "Any file",
 				extensions: ["*"]
-            }
+			}
 		]
 	});
 	event.reply("collect-save-dialog", result);

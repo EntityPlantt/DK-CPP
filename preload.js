@@ -1,6 +1,6 @@
 const { contextBridge, ipcRenderer } = require("electron"), { writeFile, readFile, writeFileSync } = require("fs"),
 	{ exec } = require("child_process"), { join } = require("path");
-var filePath = "", exposedVariables = new Object;
+var filePath = "", exposedVariables = new Object, zoom;
 function saveProject() {
 	if (!filePath.length) {
 		saveAsProject();
@@ -179,6 +179,29 @@ async function assocFile(changeSettings = true, askLater = false) {
 	}
 	document.getElementById("file-assoc").remove();
 }
+ipcRenderer.on("menu-action", (_event, action) => {
+	switch (action) {
+		case "new": exec(`start "${ipcRenderer.sendSync("get-path", "exe")}"`); break;
+		case "open": openProject(); break;
+		case "save": saveProject(); break;
+		case "save-as": saveAsProject(); break;
+		case "build": buildProject(); break;
+		case "run": runProject(); break;
+		case "build-and-run": buildAndRunProject(); break;
+		case "zoom-in": zoom *= 1.1; updateZoom(); break;
+		case "zoom-out": zoom /= 1.1; updateZoom(); break;
+		case "zoom-reset": zoom = 1; updateZoom(); break;
+	}
+});
+function updateZoom() {
+	document.body.style = `--zoom: ${zoom};`;
+	window.blur();
+	localStorage.setItem("app-settings-zoom", zoom);
+	document.querySelectorAll("svg").forEach(elm => {
+		elm.setAttribute("width", Math.floor(48 * zoom));
+		elm.setAttribute("height", Math.floor(48 * zoom));
+	});
+}
 contextBridge.exposeInMainWorld("saveProject", saveProject);
 contextBridge.exposeInMainWorld("saveAsProject", saveAsProject);
 contextBridge.exposeInMainWorld("loadProject", loadProject);
@@ -188,6 +211,8 @@ contextBridge.exposeInMainWorld("buildAndRunProject", buildAndRunProject);
 contextBridge.exposeInMainWorld("runProject", runProject);
 contextBridge.exposeInMainWorld("loadCallback", loadCallback);
 contextBridge.exposeInMainWorld("assocFile", assocFile);
+contextBridge.exposeInMainWorld("setZoom", v => zoom = v);
+contextBridge.exposeInMainWorld("updateZoom", updateZoom);
 contextBridge.exposeInMainWorld("sendOverBridge", (apiKey, api) => {
 	exposedVariables[apiKey] = api;
 });
