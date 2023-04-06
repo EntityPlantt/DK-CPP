@@ -7,7 +7,9 @@ const menuTemplate = [
 			{ type: "separator" },
 			{ label: "Open", action: "open", accelerator: "CmdOrCtrl+O" },
 			{ label: "Save", action: "save", accelerator: "CmdOrCtrl+S" },
-			{ label: "Save As", action: "save-as", accelerator: "CmdOrCtrl+Shift+S" }
+			{ label: "Save As", action: "save-as", accelerator: "CmdOrCtrl+Shift+S" },
+			{ type: "separator" },
+			{ label: "File Association...", action: "file-assoc", accelerator: "Alt+Shift+CmdOrCtrl+A" }
 		]
 	},
 	{
@@ -37,6 +39,13 @@ const menuTemplate = [
 			{ label: "Zoom In", action: "zoom-in", accelerator: "CmdOrCtrl+=" },
 			{ label: "Zoom Out", action: "zoom-out", accelerator: "CmdOrCtrl+-" },
 			{ label: "Reset Zoom", action: "zoom-reset", accelerator: "CmdOrCtrl+0" }
+		]
+	},
+	{
+		label: "Help",
+		submenu: [
+			{ label: "About", action: "about" },
+			{ label: "Report a Bug", action: "report-bug" }
 		]
 	},
 	{
