@@ -1,6 +1,37 @@
-const { app, BrowserWindow, dialog } = require("electron");
-const { ipcMain } = require("electron/main");
-const path = require("path");
+const { app, BrowserWindow, dialog, ipcMain, Menu } = require("electron"), path = require("path");
+const menuTemplate = [
+	{
+		label: "File",
+		submenu: [
+			{ label: "New", action: "new", accelerator: "CommandOrControl+N" },
+			{ type: "separator" },
+			{ label: "Open", action: "open", accelerator: "CommandOrControl+O" },
+			{ label: "Save", action: "save", accelerator: "CommandOrControl+S" },
+			{ label: "Save As", action: "save-as", accelerator: "CommandOrControl+Shift+S" }
+		]
+	},
+	{
+		label: "Project",
+		submenu: [
+			{ label: "Build", action: "build", accelerator: "CommandOrControl+B" },
+			{ label: "Run", action: "run", accelerator: "CommandOrControl+R" },
+			{ label: "Build And Run", action: "build-and-run", accelerator: "CommandOrControl+Shift+B" }
+		]
+	},
+	{
+		label: "Edit",
+		submenu: [
+			{ role: "undo" },
+			{ role: "redo" },
+			{ type: "separator" },
+			{ role: "cut" },
+			{ role: "copy" },
+			{ role: "paste" },
+			{ type: "separator" },
+			{ role: "selectAll" }
+		]
+	}
+];
 var window;
 if (handleSquirrelEvent())
 	return;
@@ -12,13 +43,21 @@ function createWindow() {
 		webPreferences: {
 			preload: path.join(__dirname, "preload.js")
 		},
-		backgroundColor: "#0b0b0b",
-		autoHideMenuBar: true
+		backgroundColor: "#0b0b0b"
 	});
 	win.maximize();
 	win.loadFile("index.html");
 	win.webContents.on("did-finish-load", () => {
 		win.show();
+		const itemClick = x => win.webContents.send("menu-action", x.action);
+		for (var subm of menuTemplate) {
+			for (var item of subm.submenu) {
+				if (item.action) {
+					item.click = itemClick;
+				}
+			}
+		}
+		win.setMenu(Menu.buildFromTemplate(menuTemplate));
 	});
 	return win;
 }
