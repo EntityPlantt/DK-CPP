@@ -1,6 +1,69 @@
-const { app, BrowserWindow, dialog } = require("electron");
-const { ipcMain } = require("electron/main");
-const path = require("path");
+const { app, BrowserWindow, dialog, ipcMain, Menu } = require("electron"), path = require("path");
+const menuTemplate = [
+	{
+		label: "File",
+		submenu: [
+			{ label: "New", action: "new", accelerator: "CmdOrCtrl+N" },
+			{ type: "separator" },
+			{ label: "Open", action: "open", accelerator: "CmdOrCtrl+O" },
+			{ label: "Save", action: "save", accelerator: "CmdOrCtrl+S" },
+			{ label: "Save As", action: "save-as", accelerator: "CmdOrCtrl+Shift+S" },
+			{ type: "separator" },
+			{ label: "File Association...", action: "file-assoc", accelerator: "Alt+Shift+CmdOrCtrl+A" }
+		]
+	},
+	{
+		label: "Project",
+		submenu: [
+			{ label: "Build", action: "build", accelerator: "CmdOrCtrl+B" },
+			{ label: "Run", action: "run", accelerator: "CmdOrCtrl+R" },
+			{ label: "Build And Run", action: "build-and-run", accelerator: "CmdOrCtrl+Shift+B" }
+		]
+	},
+	{
+		label: "Edit",
+		submenu: [
+			{ role: "undo" },
+			{ role: "redo" },
+			{ type: "separator" },
+			{ role: "cut" },
+			{ role: "copy" },
+			{ role: "paste" },
+			{ type: "separator" },
+			{ role: "selectAll" }
+		]
+	},
+	{
+		label: "View",
+		submenu: [
+			{ label: "Zoom In", action: "zoom-in", accelerator: "CmdOrCtrl+=" },
+			{ label: "Zoom Out", action: "zoom-out", accelerator: "CmdOrCtrl+-" },
+			{ label: "Reset Zoom", action: "zoom-reset", accelerator: "CmdOrCtrl+0" }
+		]
+	},
+	{
+		label: "Help",
+		submenu: [
+			{ label: "About", action: "about" },
+			{ label: "Report a Bug", action: "report-bug" }
+		]
+	},
+	{
+		label: "Debug",
+		submenu: [
+			{ label: "Open DevTools", accelerator: "CmdOrCtrl+Shift+I", click: () => window.webContents.openDevTools() }
+		]
+	}
+], contextMenuTemplate = [
+	{ role: "selectAll" },
+	{ role: "cut" },
+	{ role: "copy" },
+	{ role: "paste" },
+	{ type: "separator" },
+	{ label: "Build", action: "build" },
+	{ label: "Run", action: "run" },
+	{ label: "Build And Run", action: "build-and-run" }
+];
 var window;
 if (handleSquirrelEvent())
 	return;
@@ -12,13 +75,26 @@ function createWindow() {
 		webPreferences: {
 			preload: path.join(__dirname, "preload.js")
 		},
-		backgroundColor: "#0b0b0b",
-		autoHideMenuBar: true
+		backgroundColor: "#0b0b0b"
 	});
 	win.maximize();
 	win.loadFile("index.html");
 	win.webContents.on("did-finish-load", () => {
 		win.show();
+		const itemClick = x => win.webContents.send("menu-action", x.action);
+		for (var subm of menuTemplate) {
+			for (var item of subm.submenu) {
+				if (item.action) {
+					item.click = itemClick;
+				}
+			}
+		}
+		for (var item of contextMenuTemplate) {
+			if (item.action) {
+				item.click = itemClick;
+			}
+		}
+		win.setMenu(Menu.buildFromTemplate(menuTemplate));
 	});
 	return win;
 }
@@ -71,17 +147,20 @@ ipcMain.on("show-save-dialog", (event, filePath) => {
 			{
 				name: "C++ Header",
 				extensions: ["h", "hpp", "hxx", "h++"]
-            },
+			},
 			{
 				name: "Any file",
 				extensions: ["*"]
-            }
+			}
 		]
 	});
 	event.reply("collect-save-dialog", result);
 });
 ipcMain.on("get-path", (event, name) => event.returnValue = app.getPath(name));
 ipcMain.on("get-process-argv", event => event.returnValue = process.argv);
+ipcMain.on("show-context-menu", event => {
+	Menu.buildFromTemplate(contextMenuTemplate).popup(BrowserWindow.fromWebContents(event.sender));
+})
 function handleSquirrelEvent() {
 	if (process.argv.length == 1) {
 		return false;

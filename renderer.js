@@ -1,6 +1,5 @@
-var zoom;
 onload = () => {
-	zoom = parseInt(localStorage.getItem("app-settings-zoom")) || 1;
+	setZoom(parseInt(localStorage.getItem("app-settings-zoom")) || 1);
 	updateZoom();
 	editor = window.ace.edit(document.getElementById("main"), {
 		selectionStyle: "line",
@@ -56,53 +55,6 @@ onload = () => {
 		enableSnippets: true,
 		fontSize: "calc(12pt * var(--zoom))"
 	});
-	onkeydown = event => {
-		if (event.ctrlKey) {
-			const keys = ["s", "b", "r", "o", "w", "+", "-", "=", "0"];
-			if (keys.includes(event.key)) {
-				event.preventDefault();
-			}
-			switch (event.key.toLowerCase()) {
-				case "s":
-					if (event.shiftKey) {
-						saveAsProject();
-					}
-					else {
-						saveProject();
-					}
-					break;
-				case "b":
-					if (event.shiftKey) {
-						buildAndRunProject();
-					}
-					else {
-						buildProject();
-					}
-					break;
-				case "r":
-					if (!event.shiftKey) { 
-						runProject();
-					}
-					break;
-				case "o":
-					openProject();
-					break;
-				case "+":
-				case "=":
-					zoom *= 1.1;
-					updateZoom();
-					break;
-				case "-":
-					zoom /= 1.1;
-					updateZoom();
-					break;
-				case "0":
-					zoom = 1;
-					updateZoom();
-					break;
-			}
-		}
-	}
 	sendOverBridge("editorValue", () => editor.getValue());
 	sendOverBridge("setEditorValue", data => editor.session.setValue(data));
 	sendOverBridge("setBuildLog", text => {
@@ -119,15 +71,6 @@ onload = () => {
 	sendOverBridge("getBuildLog", () => document.getElementById("debug").innerText);
 	sendOverBridge("updateErrors", updateErrors);
 	loadCallback();
-}
-function updateZoom() {
-	document.body.style = `--zoom: ${zoom};`;
-	blur();
-	localStorage.setItem("app-settings-zoom", zoom);
-	document.querySelectorAll("svg").forEach(elm => {
-		elm.setAttribute("width", Math.floor(48 * zoom));
-		elm.setAttribute("height", Math.floor(48 * zoom));
-	});
 }
 function updateErrors(filePath) {
 	var log = document.getElementById("debug").innerText, row, column, annotations = [], type, text;
