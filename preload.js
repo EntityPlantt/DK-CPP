@@ -76,6 +76,10 @@ function loadCallback() {
 			break;
 		}
 	}
+	oncontextmenu = event => {
+		event.preventDefault();
+		ipcRenderer.send("show-context-menu");
+	};
 }
 function buildProject() {
 	saveProject();
@@ -179,6 +183,15 @@ async function assocFile(changeSettings = true, askLater = false) {
 	}
 	document.getElementById("file-assoc").remove();
 }
+function updateZoom() {
+	document.body.style = `--zoom: ${zoom};`;
+	window.blur();
+	localStorage.setItem("app-settings-zoom", zoom);
+	document.querySelectorAll("svg").forEach(elm => {
+		elm.setAttribute("width", Math.floor(48 * zoom));
+		elm.setAttribute("height", Math.floor(48 * zoom));
+	});
+}
 ipcRenderer.on("menu-action", (_event, action) => {
 	switch (action) {
 		case "new": exec(`start "${ipcRenderer.sendSync("get-path", "exe")}"`); break;
@@ -193,15 +206,6 @@ ipcRenderer.on("menu-action", (_event, action) => {
 		case "zoom-reset": zoom = 1; updateZoom(); break;
 	}
 });
-function updateZoom() {
-	document.body.style = `--zoom: ${zoom};`;
-	window.blur();
-	localStorage.setItem("app-settings-zoom", zoom);
-	document.querySelectorAll("svg").forEach(elm => {
-		elm.setAttribute("width", Math.floor(48 * zoom));
-		elm.setAttribute("height", Math.floor(48 * zoom));
-	});
-}
 contextBridge.exposeInMainWorld("saveProject", saveProject);
 contextBridge.exposeInMainWorld("saveAsProject", saveAsProject);
 contextBridge.exposeInMainWorld("loadProject", loadProject);

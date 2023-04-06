@@ -3,19 +3,19 @@ const menuTemplate = [
 	{
 		label: "File",
 		submenu: [
-			{ label: "New", action: "new", accelerator: "CommandOrControl+N" },
+			{ label: "New", action: "new", accelerator: "CmdOrCtrl+N" },
 			{ type: "separator" },
-			{ label: "Open", action: "open", accelerator: "CommandOrControl+O" },
-			{ label: "Save", action: "save", accelerator: "CommandOrControl+S" },
-			{ label: "Save As", action: "save-as", accelerator: "CommandOrControl+Shift+S" }
+			{ label: "Open", action: "open", accelerator: "CmdOrCtrl+O" },
+			{ label: "Save", action: "save", accelerator: "CmdOrCtrl+S" },
+			{ label: "Save As", action: "save-as", accelerator: "CmdOrCtrl+Shift+S" }
 		]
 	},
 	{
 		label: "Project",
 		submenu: [
-			{ label: "Build", action: "build", accelerator: "CommandOrControl+B" },
-			{ label: "Run", action: "run", accelerator: "CommandOrControl+R" },
-			{ label: "Build And Run", action: "build-and-run", accelerator: "CommandOrControl+Shift+B" }
+			{ label: "Build", action: "build", accelerator: "CmdOrCtrl+B" },
+			{ label: "Run", action: "run", accelerator: "CmdOrCtrl+R" },
+			{ label: "Build And Run", action: "build-and-run", accelerator: "CmdOrCtrl+Shift+B" }
 		]
 	},
 	{
@@ -34,17 +34,26 @@ const menuTemplate = [
 	{
 		label: "View",
 		submenu: [
-			{ label: "Zoom In", action: "zoom-in", accelerator: "CommandOrControl+=" },
-			{ label: "Zoom Out", action: "zoom-out", accelerator: "CommandOrControl+-" },
-			{ label: "Reset Zoom", action: "zoom-reset", accelerator: "CommandOrControl+0" }
+			{ label: "Zoom In", action: "zoom-in", accelerator: "CmdOrCtrl+=" },
+			{ label: "Zoom Out", action: "zoom-out", accelerator: "CmdOrCtrl+-" },
+			{ label: "Reset Zoom", action: "zoom-reset", accelerator: "CmdOrCtrl+0" }
 		]
 	},
 	{
 		label: "Debug",
 		submenu: [
-			{ label: "Open DevTools", accelerator: "CommandOrControl+Shift+I", click: () => window.webContents.openDevTools() }
+			{ label: "Open DevTools", accelerator: "CmdOrCtrl+Shift+I", click: () => window.webContents.openDevTools() }
 		]
 	}
+], contextMenuTemplate = [
+	{ role: "selectAll" },
+	{ role: "cut" },
+	{ role: "copy" },
+	{ role: "paste" },
+	{ type: "separator" },
+	{ label: "Build", action: "build" },
+	{ label: "Run", action: "run" },
+	{ label: "Build And Run", action: "build-and-run" }
 ];
 var window;
 if (handleSquirrelEvent())
@@ -69,6 +78,11 @@ function createWindow() {
 				if (item.action) {
 					item.click = itemClick;
 				}
+			}
+		}
+		for (var item of contextMenuTemplate) {
+			if (item.action) {
+				item.click = itemClick;
 			}
 		}
 		win.setMenu(Menu.buildFromTemplate(menuTemplate));
@@ -135,6 +149,9 @@ ipcMain.on("show-save-dialog", (event, filePath) => {
 });
 ipcMain.on("get-path", (event, name) => event.returnValue = app.getPath(name));
 ipcMain.on("get-process-argv", event => event.returnValue = process.argv);
+ipcMain.on("show-context-menu", event => {
+	Menu.buildFromTemplate(contextMenuTemplate).popup(BrowserWindow.fromWebContents(event.sender));
+})
 function handleSquirrelEvent() {
 	if (process.argv.length == 1) {
 		return false;
