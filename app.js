@@ -51,7 +51,8 @@ const menuTemplate = [
 	{
 		label: "Debug",
 		submenu: [
-			{ label: "Open DevTools", accelerator: "CmdOrCtrl+Shift+I", click: () => window.webContents.openDevTools() }
+			{ label: "Open DevTools", accelerator: "CmdOrCtrl+Shift+I", click: () => window.webContents.openDevTools() },
+			{ label: "Reload", action: "reload" }
 		]
 	}
 ], contextMenuTemplate = [

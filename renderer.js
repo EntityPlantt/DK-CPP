@@ -70,6 +70,18 @@ onload = () => {
 	});
 	sendOverBridge("getBuildLog", () => document.getElementById("debug").innerText);
 	sendOverBridge("updateErrors", updateErrors);
+	sendOverBridge("editorLastCharacter", () => {
+		const c = editor.selection.getCursor();
+		return editor.session.getTextRange(new ace.Range(c.row, c.column - 1, c.row, c.column));
+	});
+	sendOverBridge("getEditorWordRange", getEditorWordRange);
+	sendOverBridge("getEditorWord", () => editor.session.getTextRange(getEditorWordRange()));
+	sendOverBridge("autocomplete", text => {
+		editor.session.replace(getEditorWordRange(), text);
+	});
+	sendOverBridge("autocompleteOptions", arr => {
+		document.getElementById("autocomplete").innerHTML = arr.map(x => `<li>${x}</li>`).join("");
+	})
 	loadCallback();
 }
 function updateErrors(filePath) {
@@ -111,4 +123,9 @@ function goTo(place) {
 	place = place.split(":");
 	editor.gotoLine(parseInt(place[1]), parseInt(place[2]), true);
 	editor.focus();
+}
+function getEditorWordRange() {
+	const cursor = editor.selection.getCursor(), before = Object.assign({}, cursor);
+	while (/\w/.test(editor.session.getTextRange(new ace.Range(before.row, before.column - 1, before.row, before.column)))) before.column--;
+	return new ace.Range(before.row, before.column, cursor.row, cursor.column);
 }
