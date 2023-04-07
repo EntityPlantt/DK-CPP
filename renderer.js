@@ -75,27 +75,27 @@ onload = () => {
 function updateErrors(filePath) {
 	var log = document.getElementById("debug").innerText, row, column, annotations = [], type, text;
 	while (/\:\d+\:\d+/m.test(log)) {
-		log = log.substr(log.search(/\:\d+\:\d+/m) + 1);
+		log = log.substring(log.search(/\:\d+\:\d+/m) + 1);
 		row = column = 0;
 		while (log[0] != ":") {
 			row *= 10;
 			row += parseInt(log[0]);
-			log = log.substr(1);
+			log = log.substring(1);
 		}
-		log = log.substr(1);
+		log = log.substring(1);
 		while (log[0] != ":") {
 			column *= 10;
 			column += parseInt(log[0]);
-			log = log.substr(1);
+			log = log.substring(1);
 		}
-		log = log.substr(2);
+		log = log.substring(2);
 		type = {
 			error: "error",
 			warning: "warning",
 			note: "info"
-		}[log.substr(0, log.indexOf(":"))];
-		text = log.substr(0, log.indexOf("\n"));
-		log = log.substr(log.indexOf("\n"));
+		}[log.substring(0, log.indexOf(":"))];
+		text = log.substring(0, log.indexOf("\n"));
+		log = log.substring(log.indexOf("\n"));
 		row--;
 		if (row.toString() !== "NaN" && column.toString() !== "NaN") {
 			annotations.push({row, column, type, text});

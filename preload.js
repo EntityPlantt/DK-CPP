@@ -84,13 +84,13 @@ function loadCallback() {
 function buildProject() {
 	saveProject();
 	return new Promise(ret => {
-		exec(`g++ "${filePath}" -o "${filePath.substr(0, filePath.lastIndexOf("."))}.exe" -w -Wpedantic -Wall -Wextra`, (error, stdout, stderr) => {
+		exec(`g++ "${filePath}" -o "${filePath.substring(0, filePath.lastIndexOf("."))}.exe" -w -Wpedantic -Wall -Wextra`, (error, stdout, stderr) => {
 			if (error) {
 				exposedVariables.setBuildLog(stderr);
 			}
 			else {
 				exposedVariables.setBuildLog(`${stdout}${stdout.length ? "\n" : ""}Project successfully built file:
-${filePath.substr(0, filePath.lastIndexOf(".")) + ".exe"}`);
+${filePath.substring(0, filePath.lastIndexOf(".")) + ".exe"}`);
 			}
 			exposedVariables.setBuildLogError(Boolean(error));
 			ret(!error);
@@ -99,7 +99,7 @@ ${filePath.substr(0, filePath.lastIndexOf(".")) + ".exe"}`);
 	});
 }
 function runProject() {
-	writeFile(join(__dirname, "run.bat"), `call "${filePath.substr(0, filePath.lastIndexOf(".")) + ".exe"}"\npause\nexit`, err => {
+	writeFile(join(__dirname, "run.bat"), `call "${filePath.substring(0, filePath.lastIndexOf(".")) + ".exe"}"\npause\nexit`, err => {
 		if (err) {
 			exposedVariables.setBuildLog(err);
 			exposedVariables.setBuildLogError(true);
@@ -119,7 +119,7 @@ function runProject() {
 								exposedVariables.setBuildLogError(true);
 							}
 							else {
-								exposedVariables.setBuildLog(`Ran program:\n${filePath.substr(0, filePath.lastIndexOf("."))}.exe`);
+								exposedVariables.setBuildLog(`Ran program:\n${filePath.substring(0, filePath.lastIndexOf("."))}.exe`);
 								exposedVariables.setBuildLogError(false);
 							}
 						});
@@ -132,7 +132,7 @@ function runProject() {
 							exposedVariables.setBuildLogError(true);
 						}
 						else {
-							exposedVariables.setBuildLog(`Ran program:\n${filePath.substr(0, filePath.lastIndexOf("."))}.exe`);
+							exposedVariables.setBuildLog(`Ran program:\n${filePath.substring(0, filePath.lastIndexOf("."))}.exe`);
 							exposedVariables.setBuildLogError(false);
 						}
 					});
