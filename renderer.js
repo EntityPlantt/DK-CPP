@@ -79,7 +79,7 @@ onload = () => {
 	sendOverBridge("goTo", goTo);
 	var editorCursor, editorValue, lastInput;
 	document.getElementById("main").addEventListener("keyup", event => {
-		if (localStorage.getItem("auto-check")) {
+		if (localStorage.getItem("auto-check") == "true") {
 			lastInput = Date.now();
 			setTimeout(() => {
 				if (lastInput + 5000 <= Date.now()) {
@@ -146,6 +146,7 @@ function updateErrors(filePath) {
 		}
 		log = log.substring(2);
 		type = {
+			"fatal error": "error",
 			error: "error",
 			warning: "warning",
 			note: "info"

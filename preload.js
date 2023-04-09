@@ -201,16 +201,16 @@ function updateZoom() {
 function checkForErrors() {
 	if (!filePath) return;
 	saveProject();
-	exec(`g++ "${filePath}" -fsyntax-only -Wpedantic -Wall -Wextra`, (stdout, stderr) => {
-		if (stderr) {
-			exposedVariables.setBuildLog(stderr);
+	exec(`g++ "${filePath}" -fsyntax-only -Wpedantic -Wall -Wextra`, stdout => {
+		if (stdout) {
+			exposedVariables.setBuildLog(stdout);
 			exposedVariables.setBuildLogError(true);
-			exposedVariables.updateErrors(path);
+			exposedVariables.updateErrors(filePath);
 		}
 		else {
-			exposedVariables.setBuildLog(stdout + "\nNo errors found");
+			exposedVariables.setBuildLog("No errors found");
 			exposedVariables.setBuildLogError(false);
-			exposedVariables.updateErrors(path);
+			exposedVariables.updateErrors(filePath);
 		}
 	});
 }
