@@ -129,6 +129,10 @@ onload = () => {
 	loadCallback();
 }
 function updateErrors(filePath) {
+	if (!filePath) {
+		editor.session.setAnnotations([]);
+		return;
+	}
 	var log = document.getElementById("debug").innerText, row, column, annotations = [], type, text;
 	while (/\:\d+\:\d+/m.test(log)) {
 		log = log.substring(log.search(/\:\d+\:\d+/m) + 1);

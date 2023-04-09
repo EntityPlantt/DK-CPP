@@ -89,6 +89,9 @@ function loadCallback() {
 }
 function buildProject() {
 	saveProject();
+	exposedVariables.setBuildLog(`Building ${filePath}...`);
+	exposedVariables.setBuildLogError(false);
+	exposedVariables.updateErrors(filePath);
 	return new Promise(ret => {
 		exec(`g++ "${filePath}" -o "${filePath.substring(0, filePath.lastIndexOf("."))}.exe" -Wpedantic -Wall -Wextra`, (error, stdout, stderr) => {
 			if (error) {
@@ -98,13 +101,15 @@ function buildProject() {
 				exposedVariables.setBuildLog(`${stdout}${stdout.length ? "\n" : ""}Project successfully built file:
 ${filePath.substring(0, filePath.lastIndexOf(".")) + ".exe"}`);
 			}
-			exposedVariables.setBuildLogError(Boolean(error));
+			exposedVariables.setBuildLogError(!!error);
 			ret(!error);
 			exposedVariables.updateErrors(filePath);
 		});
 	});
 }
 function runProject() {
+	exposedVariables.setBuildLog(`Running ${filePath.substring(0, filePath.lastIndexOf(".")) + ".exe"}...`);
+	exposedVariables.updateErrors();
 	writeFile(join(__dirname, "run.bat"), `call "${filePath.substring(0, filePath.lastIndexOf(".")) + ".exe"}"\npause\nexit`, err => {
 		if (err) {
 			exposedVariables.setBuildLog(err);
@@ -169,7 +174,7 @@ async function assocFile(changeSettings = true, askLater = false) {
 			console.log(cmd);
 			const batch = join(__dirname, "assoc.bat");
 			writeFileSync(batch, cmd);
-			exec(`start "" "${join(__dirname, "elevate.exe")}" -wait "${batch}"`, async (stdout, stderr) => {
+			exec(`start "" "${join(__dirname, "elevate.exe")}" -wait "${batch}"`, async (error, stdout, stderr) => {
 				await exec("del " + join(__dirname, "assoc.bat"));
 				console.log("Done!");
 				exposedVariables.setBuildLog("Successfully updated file associations");
@@ -201,17 +206,15 @@ function updateZoom() {
 function checkForErrors() {
 	if (!filePath) return;
 	saveProject();
-	exec(`g++ "${filePath}" -fsyntax-only -Wpedantic -Wall -Wextra`, stdout => {
-		if (stdout) {
-			exposedVariables.setBuildLog(stdout);
-			exposedVariables.setBuildLogError(true);
-			exposedVariables.updateErrors(filePath);
+	exec(`g++ "${filePath}" -fsyntax-only -Wpedantic -Wall -Wextra`, error => {
+		if (error) {
+			exposedVariables.setBuildLog(error);
 		}
 		else {
 			exposedVariables.setBuildLog("No errors found");
-			exposedVariables.setBuildLogError(false);
-			exposedVariables.updateErrors(filePath);
 		}
+		exposedVariables.setBuildLogError(!!error);
+		exposedVariables.updateErrors(filePath);
 	});
 }
 function openSettings() {
@@ -227,6 +230,7 @@ ipcRenderer.on("menu-action", (_event, action) => {
 		case "open": openProject(); break;
 		case "save": saveProject(); break;
 		case "save-as": saveAsProject(); break;
+		case "check-for-errors": checkForErrors(); break;
 		case "build": buildProject(); break;
 		case "run": runProject(); break;
 		case "build-and-run": buildAndRunProject(); break;

@@ -1,4 +1,4 @@
-const { app, BrowserWindow, dialog, ipcMain, Menu } = require("electron"), path = require("path");
+const { app, BrowserWindow, dialog, ipcMain, Menu } = require("electron"), path = require("path"), child_process = require("child_process");
 const menuTemplate = [
 	{
 		label: "File",
@@ -15,9 +15,10 @@ const menuTemplate = [
 	{
 		label: "Project",
 		submenu: [
+			{ label: "Check for Errors", action: "check-for-errors", accelerator: "CmdOrCtrl+E" },
 			{ label: "Build", action: "build", accelerator: "CmdOrCtrl+B" },
 			{ label: "Run", action: "run", accelerator: "CmdOrCtrl+R" },
-			{ label: "Build And Run", action: "build-and-run", accelerator: "CmdOrCtrl+Shift+B" }
+			{ label: "Build and Run", action: "build-and-run", accelerator: "CmdOrCtrl+Shift+B" }
 		]
 	},
 	{
@@ -63,15 +64,27 @@ const menuTemplate = [
 	{ type: "separator" },
 	{ label: "Build", action: "build" },
 	{ label: "Run", action: "run" },
-	{ label: "Build And Run", action: "build-and-run" }
+	{ label: "Build and Run", action: "build-and-run" }
+], fileTypes = [
+	{
+		name: "C++ Source",
+		extensions: ["cpp", "cxx", "c++"]
+	},
+	{
+		name: "C++ Header",
+		extensions: ["h", "hpp", "hxx", "h++"]
+	},
+	{
+		name: "Any file",
+		extensions: ["*"]
+	}
 ];
 var window;
-if (handleSquirrelEvent())
-	return;
+if (handleSquirrelEvent()) return;
 function createWindow() {
 	const win = new BrowserWindow({
-		width: 500,
-		height: 500,
+		width: 1280,
+		height: 720,
 		show: false,
 		webPreferences: {
 			preload: path.join(__dirname, "preload.js")
@@ -116,21 +129,9 @@ ipcMain.on("show-open-dialog", (event, filePath) => {
 	var path = dialog.showOpenDialogSync(window, {
 		defaultPath: filePath,
 		title: "Edit C++ File",
+		icon: "icon.ico",
 		buttonLabel: "Edit",
-		filters: [
-			{
-				name: "C++ Source",
-				extensions: ["cpp", "cxx", "c++"]
-			},
-			{
-				name: "C++ Header",
-				extensions: ["h", "hpp", "hxx", "h++"]
-			},
-			{
-				name: "Any file",
-				extensions: ["*"]
-			}
-		]
+		filters: fileTypes
 	});
 	event.reply("collect-open-dialog", path ? path[0] : path);
 });
@@ -140,20 +141,7 @@ ipcMain.on("show-save-dialog", (event, filePath) => {
 		title: "Save C++ File",
 		icon: "icon.ico",
 		buttonLabel: "Save",
-		filters: [
-			{
-				name: "C++ Source",
-				extensions: ["cpp", "cxx", "c++"]
-			},
-			{
-				name: "C++ Header",
-				extensions: ["h", "hpp", "hxx", "h++"]
-			},
-			{
-				name: "Any file",
-				extensions: ["*"]
-			}
-		]
+		filters: fileTypes
 	});
 	event.reply("collect-save-dialog", result);
 });
@@ -166,22 +154,18 @@ function handleSquirrelEvent() {
 	if (process.argv.length == 1) {
 		return false;
 	}
-	const ChildProcess = require('child_process');
-	const path = require('path');
 	const appFolder = path.resolve(process.execPath, '..');
 	const rootAtomFolder = path.resolve(appFolder, '..');
 	const updateDotExe = path.resolve(path.join(rootAtomFolder, 'Update.exe'));
 	const exeName = path.basename(process.execPath);
 	const spawn = (command, args) => {
-		let spawnedProcess, error;
+		var spawnedProcess;
 		try {
-			spawnedProcess = ChildProcess.spawn(command, args, { detached: true });
+			spawnedProcess = child_process.spawn(command, args, { detached: true });
 		} catch (error) { }
 		return spawnedProcess;
 	};
-	const spawnUpdate = function (args) {
-		return spawn(updateDotExe, args);
-	};
+	const spawnUpdate = args => spawn(updateDotExe, args);
 	const squirrelEvent = process.argv[1];
 	switch (squirrelEvent) {
 		case '--squirrel-install':
@@ -194,7 +178,6 @@ function handleSquirrelEvent() {
 			spawnUpdate(['--createShortcut', exeName]);
 			setTimeout(app.quit, 1000);
 			return true;
-
 		case '--squirrel-uninstall':
 			// Undo anything you did in the --squirrel-install and
 			// --squirrel-updated handlers
@@ -202,7 +185,6 @@ function handleSquirrelEvent() {
 			spawnUpdate(['--removeShortcut', exeName]);
 			setTimeout(app.quit, 1000);
 			return true;
-
 		case '--squirrel-obsolete':
 			// This is called on the outgoing version of your app before
 			// we update to the new version - it's the opposite of
