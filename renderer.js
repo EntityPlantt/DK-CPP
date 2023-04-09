@@ -77,8 +77,16 @@ onload = () => {
 	sendOverBridge("autocomplete", autocomplete);
 	sendOverBridge("autocompleteOptions", autocompleteOptions);
 	sendOverBridge("goTo", goTo);
-	var editorCursor, editorValue;
+	var editorCursor, editorValue, lastInput;
 	document.getElementById("main").addEventListener("keyup", event => {
+		if (localStorage.getItem("auto-check")) {
+			lastInput = Date.now();
+			setTimeout(() => {
+				if (lastInput + 5000 <= Date.now()) {
+					checkForErrors();
+				}
+			}, 5000);
+		}
 		if (/^(\w|Backspace|Arrow(Up|Down)|Tab|\t)$/.test(event.key) && !(event.ctrlKey || event.altKey || event.shiftKey || event.metaKey)) {
 			if (/^(\w|Backspace)$/.test(event.key)) {
 				const word = editor.session.getTextRange(getEditorWordRange());

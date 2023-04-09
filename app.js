@@ -9,7 +9,7 @@ const menuTemplate = [
 			{ label: "Save", action: "save", accelerator: "CmdOrCtrl+S" },
 			{ label: "Save As", action: "save-as", accelerator: "CmdOrCtrl+Shift+S" },
 			{ type: "separator" },
-			{ label: "File Association...", action: "file-assoc", accelerator: "Alt+Shift+CmdOrCtrl+A" }
+			{ label: "Settings", action: "settings", accelerator: "CmdOrCtrl+`" }
 		]
 	},
 	{

@@ -74,7 +74,7 @@
 		#debug a:hover {
 			text-decoration: underline;
 		}
-		#file-assoc {
+		#file-assoc, #settings {
 			position: absolute;
 			top: 50vh;
 			left: 50vw;
@@ -87,8 +87,13 @@
 			border-radius: 20px;
 			padding: 20px 25px;
 			user-select: none;
+			animation: settings-appear .5s 1;
 		}
-		#file-assoc button {
+		@keyframes settings-appear {
+			from { opacity: 0; filter: blur(500px); }
+			to { opacity: 1; filter: blur(0px); }
+		}
+		button {
 			background: #212121;
 			color: inherit;
 			font: inherit;
@@ -97,25 +102,25 @@
 			border-radius: 5px;
 			padding: 3px 4px;
 		}
-		#file-assoc button:hover {
+		button:hover {
 			background: #1b1b1b;
 		}
-        #autocomplete {
-            position: absolute;
-            z-index: 9;
-            bottom: 0;
-            left: 0;
-            width: calc(100vw - 300px * var(--zoom));
-            max-height: calc(200px * var(--zoom));
+		#autocomplete {
+			position: absolute;
+			z-index: 9;
+			bottom: 0;
+			left: 0;
+			width: calc(100vw - 300px * var(--zoom));
+			max-height: calc(200px * var(--zoom));
 			overflow-y: scroll;
-            padding: 0;
-            margin: 0;
-            background: #12121280;
-            color: white;
-            font: calc(20px * var(--zoom)) monospace;
-            list-style: none;
+			padding: 0;
+			margin: 0;
+			background: #12121280;
+			color: white;
+			font: calc(20px * var(--zoom)) monospace;
+			list-style: none;
 			scroll-behavior: smooth;
-        }
+		}
 		#autocomplete li {
 			padding: calc(10px * var(--zoom)) calc(25px * var(--zoom));
 			cursor: pointer;
@@ -183,6 +188,11 @@
 		<input id="file-assoc-h++" type="checkbox" /> <label for="file-assoc-h++">C++ Header (<code>.h++</code>)</label><br /><br />
 		<button onclick="assocFile()">Associate <img src="resources/run-as-admin.png" height="18" /></button> <button onclick="assocFile(false)">Leave everything as-is</button> <button onclick="assocFile(false, true)">Ask later</button>
 		<br /><br /><i>Known bugs: Actually clicking on the file doesn't work, this is just system association. To open files with double click, manually set this program to open the file types you want to.</i>
+	</div>
+	<div id="settings" style="display:none">
+		<input type="checkbox" id="settings-auto-check" onchange="localStorage.setItem('auto-check', this.checked)" /><label for="settings-auto-check">Auto-Check</label><br />
+		<br /><button onclick="document.getElementById('file-assoc').style.display = ''; closeSettings()">File Association...</button><br />
+		<br /><button onclick="closeSettings()">Close</button>
 	</div>
 </body>
 </html>

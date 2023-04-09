@@ -90,7 +90,7 @@ function loadCallback() {
 function buildProject() {
 	saveProject();
 	return new Promise(ret => {
-		exec(`g++ "${filePath}" -o "${filePath.substring(0, filePath.lastIndexOf("."))}.exe" -w -Wpedantic -Wall -Wextra`, (error, stdout, stderr) => {
+		exec(`g++ "${filePath}" -o "${filePath.substring(0, filePath.lastIndexOf("."))}.exe" -Wpedantic -Wall -Wextra`, (error, stdout, stderr) => {
 			if (error) {
 				exposedVariables.setBuildLog(stderr);
 			}
@@ -198,6 +198,29 @@ function updateZoom() {
 		elm.setAttribute("height", Math.floor(48 * zoom));
 	});
 }
+function checkForErrors() {
+	if (!filePath) return;
+	saveProject();
+	exec(`g++ "${filePath}" -fsyntax-only -Wpedantic -Wall -Wextra`, (stdout, stderr) => {
+		if (stderr) {
+			exposedVariables.setBuildLog(stderr);
+			exposedVariables.setBuildLogError(true);
+			exposedVariables.updateErrors(path);
+		}
+		else {
+			exposedVariables.setBuildLog(stdout + "\nNo errors found");
+			exposedVariables.setBuildLogError(false);
+			exposedVariables.updateErrors(path);
+		}
+	});
+}
+function openSettings() {
+	document.getElementById("settings").style.display = "";
+	document.getElementById("settings-auto-check").checked = (localStorage.getItem("auto-check") || "false") == "true";
+}
+function closeSettings() {
+	document.getElementById("settings").style.display = "none";
+}
 ipcRenderer.on("menu-action", (_event, action) => {
 	switch (action) {
 		case "new": exec(`start "" "${ipcRenderer.sendSync("get-path", "exe")}"`); break;
@@ -211,7 +234,7 @@ ipcRenderer.on("menu-action", (_event, action) => {
 		case "zoom-out": zoom /= 1.1; updateZoom(); break;
 		case "zoom-reset": zoom = 1; updateZoom(); break;
 		case "about": shell.openExternal("https://github.com/EntityPlantt/DK-CPP"); break;
-		case "file-assoc": document.getElementById("file-assoc").style.display = ""; break;
+		case "settings": openSettings(); break;
 		case "report-bug": shell.openExternal("https://github.com/EntityPlantt/DK-CPP/issues/new?assignees=EntityPlantt&labels=bug&template=bug_report.md&title=%5BBug%5D"); break;
 		case "reload": location.reload(); break;
 	}
@@ -227,6 +250,8 @@ contextBridge.exposeInMainWorld("loadCallback", loadCallback);
 contextBridge.exposeInMainWorld("assocFile", assocFile);
 contextBridge.exposeInMainWorld("setZoom", v => zoom = v);
 contextBridge.exposeInMainWorld("updateZoom", updateZoom);
+contextBridge.exposeInMainWorld("checkForErrors", checkForErrors);
+contextBridge.exposeInMainWorld("closeSettings", closeSettings);
 contextBridge.exposeInMainWorld("sendOverBridge", (apiKey, api) => {
 	exposedVariables[apiKey] = api;
 });
