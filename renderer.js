@@ -90,8 +90,8 @@ onload = () => {
 		else {
 			autocompleteOptions([]);
 		}
-		if (["ArrowUp", "ArrowDown", "Tab", "\t"].includes(event.key) && document.getElementById("autocomplete").innerHTML) {
-			console.log("moving");
+		if (["ArrowUp", "ArrowDown", "Tab", "\t"].includes(event.key) && document.getElementById("autocomplete").innerHTML
+			&& !(event.ctrlKey || event.altKey || event.shiftKey || event.metaKey)) {
 			editor.undo();
 			setEditorValue(editorValue, true);
 			goTo(editorCursor.row + ":" + editorCursor.column);
@@ -99,12 +99,14 @@ onload = () => {
 			if (event.key == "ArrowUp") {
 				if (elm.previousElementSibling) {
 					elm.previousElementSibling.classList.add("selected");
+					elm.previousElementSibling.scrollIntoView();
 					elm.classList.remove("selected");
 				}
 			}
 			else if (event.key == "ArrowDown") {
 				if (elm.nextElementSibling) {
 					elm.nextElementSibling.classList.add("selected");
+					elm.nextElementSibling.scrollIntoView();
 					elm.classList.remove("selected");
 				}
 			}

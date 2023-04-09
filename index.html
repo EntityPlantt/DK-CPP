@@ -114,10 +114,13 @@
             color: white;
             font: calc(20px * var(--zoom)) monospace;
             list-style: none;
+			scroll-behavior: smooth;
         }
 		#autocomplete li {
 			padding: calc(10px * var(--zoom)) calc(25px * var(--zoom));
 			cursor: pointer;
+			text-overflow: ellipsis;
+			overflow: hidden;
 		}
 		#autocomplete li:hover {
 			background: #24242440;
