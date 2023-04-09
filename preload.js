@@ -1,6 +1,6 @@
 const { contextBridge, ipcRenderer, shell } = require("electron"), { writeFile, readFile, writeFileSync } = require("fs"),
 	{ exec } = require("child_process"), { join } = require("path");
-var filePath = "", exposedVariables = new Object, zoom;
+var filePath = "", exposedVariables = new Object, zoom = 1;
 function saveProject() {
 	if (!filePath.length) {
 		saveAsProject();
@@ -79,6 +79,12 @@ function loadCallback() {
 	oncontextmenu = event => {
 		event.preventDefault();
 		ipcRenderer.send("show-context-menu");
+	};
+	onclick = event => {
+		if (event.target.parentElement.id == "autocomplete") {
+			exposedVariables.autocomplete(event.target.innerText);
+		}
+		exposedVariables.autocompleteOptions([]);
 	};
 }
 function buildProject() {
@@ -194,7 +200,7 @@ function updateZoom() {
 }
 ipcRenderer.on("menu-action", (_event, action) => {
 	switch (action) {
-		case "new": exec(`start "${ipcRenderer.sendSync("get-path", "exe")}"`); break;
+		case "new": exec(`start "" "${ipcRenderer.sendSync("get-path", "exe")}"`); break;
 		case "open": openProject(); break;
 		case "save": saveProject(); break;
 		case "save-as": saveAsProject(); break;
@@ -207,6 +213,7 @@ ipcRenderer.on("menu-action", (_event, action) => {
 		case "about": shell.openExternal("https://github.com/EntityPlantt/DK-CPP"); break;
 		case "file-assoc": document.getElementById("file-assoc").style.display = ""; break;
 		case "report-bug": shell.openExternal("https://github.com/EntityPlantt/DK-CPP/issues/new?assignees=EntityPlantt&labels=bug&template=bug_report.md&title=%5BBug%5D"); break;
+		case "reload": location.reload(); break;
 	}
 });
 contextBridge.exposeInMainWorld("saveProject", saveProject);

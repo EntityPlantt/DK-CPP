@@ -55,8 +55,8 @@
 			background: darkred;
 		}
 		::-webkit-scrollbar {
-			width: 10px;
-			height: 10px;
+			width: calc(10px * var(--zoom));
+			height: calc(10px * var(--zoom));
 		}
 		::-webkit-scrollbar-track, ::-webkit-scrollbar-corner {
 			background: #333;
@@ -99,6 +99,34 @@
 		}
 		#file-assoc button:hover {
 			background: #1b1b1b;
+		}
+        #autocomplete {
+            position: absolute;
+            z-index: 9;
+            bottom: 0;
+            left: 0;
+            width: calc(100vw - 300px * var(--zoom));
+            max-height: calc(200px * var(--zoom));
+			overflow-y: scroll;
+            padding: 0;
+            margin: 0;
+            background: #12121280;
+            color: white;
+            font: calc(20px * var(--zoom)) monospace;
+            list-style: none;
+			scroll-behavior: smooth;
+        }
+		#autocomplete li {
+			padding: calc(10px * var(--zoom)) calc(25px * var(--zoom));
+			cursor: pointer;
+			text-overflow: ellipsis;
+			overflow: hidden;
+		}
+		#autocomplete li:hover {
+			background: #24242440;
+		}
+		#autocomplete li.selected {
+			background: #36363640;
 		}
 	</style>
 	<script src="ace-builds/src/ace.js"></script>
@@ -143,6 +171,7 @@
 			</tr>
 		</tbody>
 	</table>
+	<ul id="autocomplete"></ul>
 	<div id="file-assoc" style="display:none">
 		(BETA) Associate DK-C++ with these file types:<br />
 		<input id="file-assoc-cpp" type="checkbox" checked /> <label for="file-assoc-cpp">C++ Source (<code>.cpp</code>)</label><br />
