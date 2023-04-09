@@ -82,6 +82,7 @@ function createWindow() {
 	win.loadFile("index.html");
 	win.webContents.on("did-finish-load", () => {
 		win.show();
+		win.webContents.openDevTools();
 		const itemClick = x => win.webContents.send("menu-action", x.action);
 		for (var subm of menuTemplate) {
 			for (var item of subm.submenu) {

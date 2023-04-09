@@ -1,4 +1,4 @@
-const { contextBridge, ipcRenderer, shell } = require("electron"), { writeFile, readFile, writeFileSync, readFileSync } = require("fs"),
+const { contextBridge, ipcRenderer, shell } = require("electron"), { writeFile, readFile, writeFileSync } = require("fs"),
 	{ exec } = require("child_process"), { join } = require("path");
 var filePath = "", exposedVariables = new Object, zoom = 1;
 function saveProject() {
@@ -86,18 +86,6 @@ function loadCallback() {
 		}
 		exposedVariables.autocompleteOptions([]);
 	};
-	document.getElementById("main").addEventListener("keyup", event => {
-		if (/^(\w|Backspace)$/.test(event.key) && !(event.ctrlKey || event.altKey) && /\w/.test(exposedVariables.editorLastCharacter())) {
-			const word = exposedVariables.getEditorWord();
-			var autocomp = exposedVariables.editorValue().split(/\b/);
-			autocomp.pop();
-			autocomp = [...new Set(autocomp.filter(x => /^\w*$/.test(x)))].sort();
-			exposedVariables.autocompleteOptions(autocomp.filter(x => x.includes(word)));
-		}
-		else {
-			exposedVariables.autocompleteOptions([]);
-		}
-	});
 }
 function buildProject() {
 	saveProject();
