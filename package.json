@@ -23,12 +23,11 @@
     "gnu-gcc"
   ],
   "dependencies": {
-    "electron": "^19.0.8"
+    "electron": "^19.1.9"
   },
   "devDependencies": {
-    "ace-builds": "^1.7.1",
-    "electron": "^19.0.8",
+    "electron": "^19.1.9",
     "electron-packager": "^15.5.1",
-    "electron-winstaller": "^5.0.0"
+    "electron-wix-msi": "^5.0.0"
   }
 }
