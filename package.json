@@ -20,7 +20,9 @@
     "gnu",
     "mingw",
     "gcc",
-    "gnu-gcc"
+    "gnu-gcc",
+    "electron",
+    "windows"
   ],
   "dependencies": {
     "electron": "^19.1.9"
