@@ -91,7 +91,7 @@ function buildProject() {
 	saveProject();
 	exposedVariables.setBuildLog(`Building ${filePath}...`);
 	exposedVariables.setBuildLogError(false);
-	exposedVariables.updateErrors(filePath);
+	exposedVariables.updateErrors();
 	return new Promise(ret => {
 		exec(`g++ "${filePath}" -o "${filePath.substring(0, filePath.lastIndexOf("."))}.exe" -Wpedantic -Wall -Wextra`, (error, stdout, stderr) => {
 			if (error) {
@@ -109,6 +109,7 @@ ${filePath.substring(0, filePath.lastIndexOf(".")) + ".exe"}`);
 }
 function runProject() {
 	exposedVariables.setBuildLog(`Running ${filePath.substring(0, filePath.lastIndexOf(".")) + ".exe"}...`);
+	exposedVariables.setBuildLogError(false);
 	exposedVariables.updateErrors();
 	writeFile(join(__dirname, "run.bat"), `call "${filePath.substring(0, filePath.lastIndexOf(".")) + ".exe"}"\npause\nexit`, err => {
 		if (err) {
@@ -124,7 +125,7 @@ function runProject() {
 						buildAndRunProject();
 					}
 					else {
-						exec(`del ${join(__dirname, "run.bat")}`, (error, stdout, stderr) => {
+						exec(`del "${join(__dirname, "run.bat")}"`, (error, stdout, stderr) => {
 							if (error) {
 								exposedVariables.setBuildLog(stderr);
 								exposedVariables.setBuildLogError(true);
@@ -137,7 +138,7 @@ function runProject() {
 					}
 				}
 				else {
-					exec(`del ${join(__dirname, "run.bat")}`, (error, stdout, stderr) => {
+					exec(`del "${join(__dirname, "run.bat")}"`, (error, stdout, stderr) => {
 						if (error) {
 							exposedVariables.setBuildLog(stderr);
 							exposedVariables.setBuildLogError(true);

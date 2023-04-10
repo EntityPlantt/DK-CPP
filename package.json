@@ -1,6 +1,6 @@
 {
   "name": "dk-cpp",
-  "version": "1.2.0",
+  "version": "1.2.1",
   "description": "A C++ IDE designed for easy use.",
   "main": "app.js",
   "author": {
