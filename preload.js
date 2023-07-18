@@ -58,7 +58,7 @@ function loadCallback() {
 	readdirSync(join(__dirname, "lang")).forEach(f => {
 		f = f.substring(0, f.length - 5);
 		var opt = document.createElement("option");
-		opt.value = f; opt.innerText = require(join(__dirname, "lang", f + ".json"))._name;
+		opt.value = f; opt.innerText = require(join(__dirname, "lang", f + ".json"))["language.name"];
 		if ((localStorage.getItem("lang") || "en_us") == f) opt.setAttribute("selected", "");
 		document.getElementById("lang").appendChild(opt);
 	});
@@ -237,7 +237,7 @@ function localizeEditor() {
 }
 function langChange(target) {
 	localStorage.setItem("lang", target.value);
-	ipcRenderer.sendSync("update-menu-bar", target.value);
+	ipcRenderer.send("update-menu-bar", target.value);
 	location.reload();
 }
 ipcRenderer.on("menu-action", (_event, action) => {

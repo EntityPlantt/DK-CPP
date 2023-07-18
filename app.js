@@ -25,14 +25,14 @@ const getMenuTemplate = (lang, webc) => {
 		{
 			label: l["menu.edit"],
 			submenu: [
-				{ role: "undo" },
-				{ role: "redo" },
+				{ label: l["menu.undo"], role: "undo" },
+				{ label: l["menu.redo"], role: "redo" },
 				{ type: "separator" },
-				{ role: "cut" },
-				{ role: "copy" },
-				{ role: "paste" },
+				{ label: l["menu.cut"], role: "cut" },
+				{ label: l["menu.copy"], role: "copy" },
+				{ label: l["menu.paste"], role: "paste" },
 				{ type: "separator" },
-				{ role: "selectAll" }
+				{ label: l["menu.selectall"], role: "selectAll" }
 			]
 		},
 		{
