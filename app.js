@@ -1,71 +1,92 @@
 const { app, BrowserWindow, dialog, ipcMain, Menu } = require("electron"), path = require("path"), child_process = require("child_process");
-const menuTemplate = [
-	{
-		label: "File",
-		submenu: [
-			{ label: "New", action: "new", accelerator: "CmdOrCtrl+N" },
-			{ type: "separator" },
-			{ label: "Open", action: "open", accelerator: "CmdOrCtrl+O" },
-			{ label: "Save", action: "save", accelerator: "CmdOrCtrl+S" },
-			{ label: "Save As", action: "save-as", accelerator: "CmdOrCtrl+Shift+S" },
-			{ type: "separator" },
-			{ label: "Settings", action: "settings", accelerator: "CmdOrCtrl+`" }
-		]
-	},
-	{
-		label: "Project",
-		submenu: [
-			{ label: "Check for Errors", action: "check-for-errors", accelerator: "CmdOrCtrl+E" },
-			{ label: "Build", action: "build", accelerator: "CmdOrCtrl+B" },
-			{ label: "Run", action: "run", accelerator: "CmdOrCtrl+R" },
-			{ label: "Build and Run", action: "build-and-run", accelerator: "CmdOrCtrl+Shift+B" }
-		]
-	},
-	{
-		label: "Edit",
-		submenu: [
-			{ role: "undo" },
-			{ role: "redo" },
-			{ type: "separator" },
-			{ role: "cut" },
-			{ role: "copy" },
-			{ role: "paste" },
-			{ type: "separator" },
-			{ role: "selectAll" }
-		]
-	},
-	{
-		label: "View",
-		submenu: [
-			{ label: "Zoom In", action: "zoom-in", accelerator: "CmdOrCtrl+=" },
-			{ label: "Zoom Out", action: "zoom-out", accelerator: "CmdOrCtrl+-" },
-			{ label: "Reset Zoom", action: "zoom-reset", accelerator: "CmdOrCtrl+0" }
-		]
-	},
-	{
-		label: "Help",
-		submenu: [
-			{ label: "About", action: "about" },
-			{ label: "Report a Bug", action: "report-bug" }
-		]
-	},
-	{
-		label: "Debug",
-		submenu: [
-			{ label: "Open DevTools", accelerator: "CmdOrCtrl+Shift+I", click: () => window.webContents.openDevTools() },
-			{ label: "Reload", action: "reload" }
-		]
+const getMenuTemplate = (lang, webc) => {
+	var l = require(path.join(__dirname, "lang", lang)), t = [
+		{
+			label: l["menu.file"],
+			submenu: [
+				{ label: l["menu.new"], action: "new", accelerator: "CmdOrCtrl+N" },
+				{ type: "separator" },
+				{ label: l["menu.open"], action: "open", accelerator: "CmdOrCtrl+O" },
+				{ label: l["menu.save"], action: "save", accelerator: "CmdOrCtrl+S" },
+				{ label: l["menu.saveas"], action: "save-as", accelerator: "CmdOrCtrl+Shift+S" },
+				{ type: "separator" },
+				{ label: l["menu.settings"], action: "settings", accelerator: "CmdOrCtrl+`" }
+			]
+		},
+		{
+			label: l["menu.project"],
+			submenu: [
+				{ label: l["menu.checkforerrors"], action: "check-for-errors", accelerator: "CmdOrCtrl+E" },
+				{ label: l["menu.build"], action: "build", accelerator: "CmdOrCtrl+B" },
+				{ label: l["menu.run"], action: "run", accelerator: "CmdOrCtrl+R" },
+				{ label: l["menu.buildandrun"], action: "build-and-run", accelerator: "CmdOrCtrl+Shift+B" }
+			]
+		},
+		{
+			label: l["menu.edit"],
+			submenu: [
+				{ role: "undo" },
+				{ role: "redo" },
+				{ type: "separator" },
+				{ role: "cut" },
+				{ role: "copy" },
+				{ role: "paste" },
+				{ type: "separator" },
+				{ role: "selectAll" }
+			]
+		},
+		{
+			label: l["menu.view"],
+			submenu: [
+				{ label: l["menu.zoomin"], action: "zoom-in", accelerator: "CmdOrCtrl+=" },
+				{ label: l["menu.zoomout"], action: "zoom-out", accelerator: "CmdOrCtrl+-" },
+				{ label: l["menu.zoomreset"], action: "zoom-reset", accelerator: "CmdOrCtrl+0" }
+			]
+		},
+		{
+			label: l["menu.help"],
+			submenu: [
+				{ label: l["menu.about"], action: "about" },
+				{ label: l["menu.bugreport"], action: "report-bug" }
+			]
+		},
+		{
+			label: l["menu.debug"],
+			submenu: [
+				{ label: l["menu.devtools"], accelerator: "CmdOrCtrl+Shift+I", click: () => window.webContents.openDevTools() },
+				{ label: l["menu.reload"], action: "reload" }
+			]
+		}
+	];
+	const itemClick = x => webc.send("menu-action", x.action);
+	for (var subm of t) {
+		for (var item of subm.submenu) {
+			if (item.action) {
+				item.click = itemClick;
+			}
+		}
 	}
-], contextMenuTemplate = [
-	{ role: "selectAll" },
-	{ role: "cut" },
-	{ role: "copy" },
-	{ role: "paste" },
-	{ type: "separator" },
-	{ label: "Build", action: "build" },
-	{ label: "Run", action: "run" },
-	{ label: "Build and Run", action: "build-and-run" }
-], fileTypes = [
+	return t;
+}, getContextMenuTemplate = (lang, webc) => {
+	var l = require(path.join(__dirname, "lang", lang)), t = [
+		{ label: l["menu.selectall"], role: "selectAll" },
+		{ label: l["menu.cut"], role: "cut" },
+		{ label: l["menu.copy"], role: "copy" },
+		{ label: l["menu.paste"], role: "paste" },
+		{ type: "separator" },
+		{ label: l["menu.build"], action: "build" },
+		{ label: l["menu.run"], action: "run" },
+		{ label: l["menu.buildandrun"], action: "build-and-run" },
+		{ label: l["menu.checkforerrors"], action: "check-for-errors" }
+	];
+	const itemClick = x => webc.send("menu-action", x.action);
+	for (var item of t) {
+		if (item.action) {
+			item.click = itemClick;
+		}
+	}
+	return t;
+}, fileTypes = [
 	{
 		name: "C++ Source",
 		extensions: ["cpp", "cxx", "c++"]
@@ -95,20 +116,6 @@ function createWindow() {
 	win.loadFile("index.html");
 	win.webContents.on("did-finish-load", () => {
 		win.show();
-		const itemClick = x => win.webContents.send("menu-action", x.action);
-		for (var subm of menuTemplate) {
-			for (var item of subm.submenu) {
-				if (item.action) {
-					item.click = itemClick;
-				}
-			}
-		}
-		for (var item of contextMenuTemplate) {
-			if (item.action) {
-				item.click = itemClick;
-			}
-		}
-		win.setMenu(Menu.buildFromTemplate(menuTemplate));
 	});
 	return win;
 }
@@ -147,9 +154,12 @@ ipcMain.on("show-save-dialog", (event, filePath) => {
 });
 ipcMain.on("get-path", (event, name) => event.returnValue = app.getPath(name));
 ipcMain.on("get-process-argv", event => event.returnValue = process.argv);
-ipcMain.on("show-context-menu", event => {
-	Menu.buildFromTemplate(contextMenuTemplate).popup(BrowserWindow.fromWebContents(event.sender));
-})
+ipcMain.on("show-context-menu", (event, lang) => {
+	Menu.buildFromTemplate(getContextMenuTemplate(lang, event.sender)).popup(BrowserWindow.fromWebContents(event.sender));
+});
+ipcMain.on("update-menu-bar", (event, lang) => {
+	window.setMenu(Menu.buildFromTemplate(getMenuTemplate(lang, event.sender)));
+});
 function handleSquirrelEvent() {
 	if (process.argv.length == 1) {
 		return false;

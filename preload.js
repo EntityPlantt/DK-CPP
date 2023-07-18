@@ -55,6 +55,7 @@ async function openProject() {
 	}
 }
 function loadCallback() {
+	ipcRenderer.send("update-menu-bar", localStorage.getItem("lang") || "en_us");
 	exec("g++ --version", (error, stdout, stderr) => {
 		if (error) {
 			alert(locale["message.load.g++-error"]);
@@ -78,7 +79,7 @@ function loadCallback() {
 	}
 	oncontextmenu = event => {
 		event.preventDefault();
-		ipcRenderer.send("show-context-menu");
+		ipcRenderer.send("show-context-menu", localStorage.getItem("lang") || "en_us");
 	};
 	onclick = event => {
 		if (event.target.parentElement.id == "autocomplete") {
