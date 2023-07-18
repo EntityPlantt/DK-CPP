@@ -93,7 +93,7 @@
 			from { opacity: 0; filter: blur(500px); }
 			to { opacity: 1; filter: blur(0px); }
 		}
-		button {
+		button, select {
 			background: #212121;
 			color: inherit;
 			font: inherit;
@@ -102,7 +102,7 @@
 			border-radius: 5px;
 			padding: 3px 4px;
 		}
-		button:hover {
+		button:hover, select:hover {
 			background: #1b1b1b;
 		}
 		#autocomplete {
@@ -190,7 +190,8 @@
 		<br /><br /><i>{{fassoc.disclaimer}}</i>
 	</div>
 	<div id="settings" style="display:none">
-		<input type="checkbox" id="settings-auto-check" onchange="localStorage.setItem('auto-check', this.checked)" /><label for="settings-auto-check">{{settings.auto_check}}</label><br />
+		<select id="lang" onchange="langChange(this)"></select><br />
+		<br /><input type="checkbox" id="settings-auto-check" onchange="localStorage.setItem('auto-check', this.checked)" /><label for="settings-auto-check">{{settings.auto_check}}</label><br />
 		<br /><button onclick="document.getElementById('file-assoc').style.display = ''; closeSettings()">{{settings.fassoc}}</button><br />
 		<br /><button onclick="closeSettings()">{{settings.close}}</button>
 	</div>

@@ -1,4 +1,4 @@
-const { contextBridge, ipcRenderer, shell } = require("electron"), { writeFile, readFile, writeFileSync } = require("fs"),
+const { contextBridge, ipcRenderer, shell } = require("electron"), { writeFile, readFile, writeFileSync, readdirSync } = require("fs"),
 	{ exec } = require("child_process"), { join } = require("path");
 var filePath = "", exposedVariables = new Object, zoom = 1, locale = new Object;
 function saveProject() {
@@ -55,7 +55,13 @@ async function openProject() {
 	}
 }
 function loadCallback() {
-	ipcRenderer.send("update-menu-bar", localStorage.getItem("lang") || "en_us");
+	readdirSync(join(__dirname, "lang")).forEach(f => {
+		f = f.substring(0, f.length - 5);
+		var opt = document.createElement("option");
+		opt.value = f; opt.innerText = require(join(__dirname, "lang", f + ".json"))._name;
+		if ((localStorage.getItem("lang") || "en_us") == f) opt.setAttribute("selected", "");
+		document.getElementById("lang").appendChild(opt);
+	});
 	exec("g++ --version", (error, stdout, stderr) => {
 		if (error) {
 			alert(locale["message.load.g++-error"]);
@@ -227,6 +233,12 @@ function localizeEditor() {
 	var text = document.body.innerHTML;
 	text = text.replaceAll(/{{(.*?)}}/g, (str, key) => locale[key]);
 	document.body.innerHTML = text;
+	ipcRenderer.send("update-menu-bar", localStorage.getItem("lang") || "en_us");
+}
+function langChange(target) {
+	localStorage.setItem("lang", target.value);
+	ipcRenderer.sendSync("update-menu-bar", target.value);
+	location.reload();
 }
 ipcRenderer.on("menu-action", (_event, action) => {
 	switch (action) {
@@ -261,6 +273,7 @@ contextBridge.exposeInMainWorld("updateZoom", updateZoom);
 contextBridge.exposeInMainWorld("checkForErrors", checkForErrors);
 contextBridge.exposeInMainWorld("closeSettings", closeSettings);
 contextBridge.exposeInMainWorld("localizeEditor", localizeEditor);
+contextBridge.exposeInMainWorld("langChange", langChange);
 contextBridge.exposeInMainWorld("sendOverBridge", (apiKey, api) => {
 	exposedVariables[apiKey] = api;
 });

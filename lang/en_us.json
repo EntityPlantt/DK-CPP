@@ -1,4 +1,5 @@
 {
+  "_name": "English (United States)",
   "fassoc.cancel": "Ask later",
   "fassoc.confirm": "Associate",
   "fassoc.disclaimer": "Known bugs: Actually clicking on the file doesn't work, this is just system association. To open files with double click, manually set this program to open the file types you want to.",
