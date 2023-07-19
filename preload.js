@@ -1,6 +1,6 @@
-const { contextBridge, ipcRenderer, shell } = require("electron"), { writeFile, readFile, writeFileSync } = require("fs"),
+const { contextBridge, ipcRenderer, shell } = require("electron"), { writeFile, readFile, writeFileSync, readdirSync } = require("fs"),
 	{ exec } = require("child_process"), { join } = require("path");
-var filePath = "", exposedVariables = new Object, zoom = 1;
+var filePath = "", exposedVariables = new Object, zoom = 1, locale = new Object;
 function saveProject() {
 	if (!filePath.length) {
 		saveAsProject();
@@ -12,7 +12,7 @@ function saveProject() {
 		}
 		return err;
 	});
-	document.title = `(Saved) ${filePath} - DK-C++`;
+	document.title = `${locale["ui.saved"]} ${filePath} - DK-C++`;
 	var oldFilePath = filePath;
 	setTimeout(() => {
 		if (oldFilePath == filePath) {
@@ -35,7 +35,7 @@ async function saveAsProject() {
 function loadProject() {
 	readFile(filePath, "utf-8", (err, data) => {
 		if (err) {
-			window.alert("Error while opening\nMore info in console\n[CTRL + SHIFT + I]");
+			window.alert(locale["message.open.error"]);
 			window.console.error(err);
 		}
 		document.title = filePath + " - DK-C++";
@@ -55,9 +55,16 @@ async function openProject() {
 	}
 }
 function loadCallback() {
+	readdirSync(join(__dirname, "lang")).forEach(f => {
+		f = f.substring(0, f.length - 5);
+		var opt = document.createElement("option");
+		opt.value = f; opt.innerText = require(join(__dirname, "lang", f + ".json"))["language.name"];
+		if ((localStorage.getItem("lang") || "en_us") == f) opt.setAttribute("selected", "");
+		document.getElementById("lang").appendChild(opt);
+	});
 	exec("g++ --version", (error, stdout, stderr) => {
 		if (error) {
-			alert("G++ (an important dependency) is not installed.\nHead over to README.md for instructions.");
+			alert(locale["message.load.g++-error"]);
 			exposedVariables.setBuildLog(stderr);
 			exposedVariables.setBuildLogError(true);
 		}
@@ -78,7 +85,7 @@ function loadCallback() {
 	}
 	oncontextmenu = event => {
 		event.preventDefault();
-		ipcRenderer.send("show-context-menu");
+		ipcRenderer.send("show-context-menu", localStorage.getItem("lang") || "en_us");
 	};
 	onclick = event => {
 		if (event.target.parentElement.id == "autocomplete") {
@@ -89,7 +96,7 @@ function loadCallback() {
 }
 function buildProject() {
 	saveProject();
-	exposedVariables.setBuildLog(`Building ${filePath}...`);
+	exposedVariables.setBuildLog(locale["log.build.start"].replaceAll("%1", filePath));
 	exposedVariables.setBuildLogError(false);
 	exposedVariables.updateErrors();
 	return new Promise(ret => {
@@ -98,8 +105,7 @@ function buildProject() {
 				exposedVariables.setBuildLog(stderr);
 			}
 			else {
-				exposedVariables.setBuildLog(`${stdout}${stdout.length ? "\n" : ""}Project successfully built file:
-${filePath.substring(0, filePath.lastIndexOf(".")) + ".exe"}`);
+				exposedVariables.setBuildLog(locale["log.build.success"].replaceAll("%1", filePath.substring(0, filePath.lastIndexOf(".")) + ".exe"));
 			}
 			exposedVariables.setBuildLogError(!!error);
 			ret(!error);
@@ -108,7 +114,7 @@ ${filePath.substring(0, filePath.lastIndexOf(".")) + ".exe"}`);
 	});
 }
 function runProject() {
-	exposedVariables.setBuildLog(`Running ${filePath.substring(0, filePath.lastIndexOf(".")) + ".exe"}...`);
+	exposedVariables.setBuildLog(locale["log.run.start"].replaceAll("%1", filePath.substring(0, filePath.lastIndexOf(".")) + ".exe"));
 	exposedVariables.setBuildLogError(false);
 	exposedVariables.updateErrors();
 	writeFile(join(__dirname, "run.bat"), `call "${filePath.substring(0, filePath.lastIndexOf(".")) + ".exe"}"\npause\nexit`, err => {
@@ -121,7 +127,7 @@ function runProject() {
 				if (error) {
 					exposedVariables.setBuildLog(stderr);
 					exposedVariables.setBuildLogError(true);
-					if (confirm("It seems like you haven't built the app.\nDo you want to build it now?")) {
+					if (confirm(locale["message.run.confirm_build"])) {
 						buildAndRunProject();
 					}
 					else {
@@ -131,7 +137,7 @@ function runProject() {
 								exposedVariables.setBuildLogError(true);
 							}
 							else {
-								exposedVariables.setBuildLog(`Ran program:\n${filePath.substring(0, filePath.lastIndexOf("."))}.exe`);
+								exposedVariables.setBuildLog(locale["log.run.success"].replaceAll("%1", filePath.substring(0, filePath.lastIndexOf(".")) + ".exe"));
 								exposedVariables.setBuildLogError(false);
 							}
 						});
@@ -144,7 +150,7 @@ function runProject() {
 							exposedVariables.setBuildLogError(true);
 						}
 						else {
-							exposedVariables.setBuildLog(`Ran program:\n${filePath.substring(0, filePath.lastIndexOf("."))}.exe`);
+							exposedVariables.setBuildLog(locale["log.run.success"].replaceAll("%1", filePath.substring(0, filePath.lastIndexOf(".")) + ".exe"));
 							exposedVariables.setBuildLogError(false);
 						}
 					});
@@ -160,7 +166,6 @@ async function buildAndRunProject() {
 }
 async function assocFile(changeSettings = true, askLater = false) {
 	if (changeSettings) {
-		console.log("Associating files...");
 		const exePath = ipcRenderer.sendSync("get-path", "exe");
 		const cfiles = [], cheaders = [], ftypeCmd = [`ftype DK-CPP.CFile="${exePath}" "%1"`, `ftype DK-CPP.Header="${exePath}" "%1"`];
 		if (document.getElementById("file-assoc-cpp").checked) cfiles.push("cpp");
@@ -172,19 +177,17 @@ async function assocFile(changeSettings = true, askLater = false) {
 		if (document.getElementById("file-assoc-h++").checked) cheaders.push("h++");
 		var cmd = cfiles.map(x => `assoc .${x}=DK-CPP.CFile`).concat(cheaders.map(x => `assoc .${x}=DK-CPP.Header`)).concat(ftypeCmd).join("\n");
 		try {
-			console.log(cmd);
 			const batch = join(__dirname, "assoc.bat");
 			writeFileSync(batch, cmd);
 			exec(`start "" "${join(__dirname, "elevate.exe")}" -wait "${batch}"`, async (error, stdout, stderr) => {
 				await exec("del " + join(__dirname, "assoc.bat"));
-				console.log("Done!");
-				exposedVariables.setBuildLog("Successfully updated file associations");
+				exposedVariables.setBuildLog(locale["log.fassoc.success"]);
 				exposedVariables.setBuildLogError(false);
 			});
 		}
 		catch (err) {
 			window.console.error(err);
-			alert("An error occured while associating files.\nPlease open DevTools [CTRL + SHIFT + I] (or see in the console) and report the bug.");
+			alert(locale["message.fassoc.error"]);
 			exposedVariables.setBuildLog(err);
 			exposedVariables.setBuildLogError(true);
 			askLater = true;
@@ -207,12 +210,12 @@ function updateZoom() {
 function checkForErrors() {
 	if (!filePath) return;
 	saveProject();
-	exec(`g++ "${filePath}" -fsyntax-only -Wpedantic -Wall -Wextra`, error => {
-		if (error) {
-			exposedVariables.setBuildLog(error);
+	exec(`g++ "${filePath}" -fsyntax-only -Wpedantic -Wall -Wextra`, (err, stdout, stderr) => {
+		if (stderr) {
+			exposedVariables.setBuildLog(stderr);
 		}
 		else {
-			exposedVariables.setBuildLog("No errors found");
+			exposedVariables.setBuildLog(locale["log.auto_check.ok"]);
 		}
 		exposedVariables.setBuildLogError(!!error);
 		exposedVariables.updateErrors(filePath);
@@ -224,6 +227,18 @@ function openSettings() {
 }
 function closeSettings() {
 	document.getElementById("settings").style.display = "none";
+}
+function localizeEditor() {
+	locale = require(join(__dirname, "lang", localStorage.getItem("lang") || "en_us"));
+	var text = document.body.innerHTML;
+	text = text.replaceAll(/{{(.*?)}}/g, (str, key) => locale[key]);
+	document.body.innerHTML = text;
+	ipcRenderer.send("update-menu-bar", localStorage.getItem("lang") || "en_us");
+}
+function langChange(target) {
+	localStorage.setItem("lang", target.value);
+	ipcRenderer.send("update-menu-bar", target.value);
+	location.reload();
 }
 ipcRenderer.on("menu-action", (_event, action) => {
 	switch (action) {
@@ -257,6 +272,8 @@ contextBridge.exposeInMainWorld("setZoom", v => zoom = v);
 contextBridge.exposeInMainWorld("updateZoom", updateZoom);
 contextBridge.exposeInMainWorld("checkForErrors", checkForErrors);
 contextBridge.exposeInMainWorld("closeSettings", closeSettings);
+contextBridge.exposeInMainWorld("localizeEditor", localizeEditor);
+contextBridge.exposeInMainWorld("langChange", langChange);
 contextBridge.exposeInMainWorld("sendOverBridge", (apiKey, api) => {
 	exposedVariables[apiKey] = api;
 });

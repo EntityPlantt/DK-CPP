@@ -1,4 +1,5 @@
 onload = () => {
+	localizeEditor();
 	setZoom(parseInt(localStorage.getItem("app-settings-zoom")) || 1);
 	updateZoom();
 	editor = window.ace.edit(document.getElementById("main"), {

@@ -3,6 +3,21 @@
 DK-C++ is an IDE for beginners with simple commands:
 **Build**, **Run** and **Build & Run**.
 
+## Translations needed!
+We need people to translate DK-C++ to their native (or secondary) languages.  
+Please help with opening a pull request adding a JSON file in the `lang` directory,
+with a filename `%ln%_%st%.json`, were `%ln%` is the language (in two letters) and
+`%st%` is the state where this language is spoken.  
+If the language is spoken in only one country,
+set `%st%` to be the same as `%ln%`.
+
+_For example, `mk_mk.json` is Macedonian, `en_us.json` is English spoken in United States,
+and `en_uk.json` is English spoken in Britain._
+
+Check `en_us.json` to see how to format the translation file, as well as the keys.
+For the places that certain keys are used, check the code.  
+_Maybe in the future there will be a tool to help translate DK-C++._
+
 ## Requirements
 * Have a computer with Windows.
 * Install G++ ([MinGW](https://sourceforge.net/projects/mingw/))
