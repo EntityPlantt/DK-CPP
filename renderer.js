@@ -78,7 +78,7 @@ onload = () => {
 	sendOverBridge("autocomplete", autocomplete);
 	sendOverBridge("autocompleteOptions", autocompleteOptions);
 	sendOverBridge("goTo", goTo);
-	var editorCursor, editorValue, lastInput;
+	var editorCursor, lastInput;
 	document.getElementById("main").addEventListener("keyup", event => {
 		if (localStorage.getItem("auto-check") == "true") {
 			lastInput = Date.now();
@@ -92,8 +92,8 @@ onload = () => {
 			if (/^(\w|Backspace)$/.test(event.key)) {
 				const word = editor.session.getTextRange(getEditorWordRange());
 				var autocomp = editor.getValue().split(/\b/);
-				autocomp = [...new Set(autocomp.filter(x => /^\w*$/.test(x)))].sort();
-				autocompleteOptions(autocomp.filter(x => x.includes(word)));
+				autocomp = [...new Set(autocomp.filter(x => /^\w+$/.test(x)))].sort();
+				autocompleteOptions(autocomp.filter(x => x.includes(word) && x != word));
 			}
 		}
 		else {
@@ -101,8 +101,6 @@ onload = () => {
 		}
 		if (["ArrowUp", "ArrowDown", "Tab", "\t"].includes(event.key) && document.getElementById("autocomplete").innerHTML
 			&& !(event.ctrlKey || event.altKey || event.shiftKey || event.metaKey)) {
-			editor.undo();
-			setEditorValue(editorValue, true);
 			goTo(editorCursor.row + ":" + editorCursor.column);
 			const elm = document.querySelector("#autocomplete > li.selected");
 			if (event.key == "ArrowUp") {
@@ -120,12 +118,12 @@ onload = () => {
 				}
 			}
 			else {
+				editor.undo();
 				autocomplete();
 				autocompleteOptions([]);
 			}
 		}
 		editorCursor = editor.selection.getCursor();
-		editorValue = editor.getValue();
 	});
 	loadCallback();
 }
