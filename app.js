@@ -86,20 +86,23 @@ const getMenuTemplate = (lang, webc) => {
 		}
 	}
 	return t;
-}, fileTypes = [
-	{
-		name: "C++ Source",
-		extensions: ["cpp", "cxx", "c++"]
-	},
-	{
-		name: "C++ Header",
-		extensions: ["h", "hpp", "hxx", "h++"]
-	},
-	{
-		name: "Any file",
-		extensions: ["*"]
-	}
-];
+}, getFileTypes = lang => {
+	var l = require(path.join(__dirname, "lang", lang));
+	return [
+		{
+			name: l["dialog.type.source"],
+			extensions: ["cpp", "cxx", "c++"]
+		},
+		{
+			name: l["dialog.type.header"],
+			extensions: ["h", "hpp", "hxx", "h++"]
+		},
+		{
+			name: l["dialog.type.any"],
+			extensions: ["*"]
+		}
+	];
+};
 var window;
 if (handleSquirrelEvent()) return;
 function createWindow() {
@@ -132,23 +135,25 @@ app.on("window-all-closed", () => {
 		app.quit();
 	}
 });
-ipcMain.on("show-open-dialog", (event, filePath) => {
-	var path = dialog.showOpenDialogSync(window, {
+ipcMain.on("show-open-dialog", (event, filePath, lang) => {
+	var l = require(path.join(__dirname, "lang", lang));
+	var result = dialog.showOpenDialogSync(window, {
 		defaultPath: filePath,
-		title: "Edit C++ File",
+		title: l["dialog.title.open"],
 		icon: "icon.ico",
-		buttonLabel: "Edit",
-		filters: fileTypes
+		buttonLabel: l["dialog.button.open"],
+		filters: getFileTypes(lang)
 	});
-	event.reply("collect-open-dialog", path ? path[0] : path);
+	event.reply("collect-open-dialog", result ? result[0] : result);
 });
-ipcMain.on("show-save-dialog", (event, filePath) => {
+ipcMain.on("show-save-dialog", (event, filePath, lang) => {
+	var l = require(path.join(__dirname, "lang", lang));
 	var result = dialog.showSaveDialogSync(window, {
 		defaultPath: filePath,
-		title: "Save C++ File",
+		title: l["dialog.title.save"],
 		icon: "icon.ico",
-		buttonLabel: "Save",
-		filters: fileTypes
+		buttonLabel: l["dialog.button.save"],
+		filters: getFileTypes(lang)
 	});
 	event.reply("collect-save-dialog", result);
 });

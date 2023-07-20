@@ -21,11 +21,9 @@ function saveProject() {
 	}, 2500);
 }
 async function saveAsProject() {
-	ipcRenderer.send("show-save-dialog", filePath);
+	ipcRenderer.send("show-save-dialog", filePath, localStorage.getItem("lang") || "en_us");
 	var result = await new Promise(ret =>
-		ipcRenderer.on("collect-save-dialog", (event, path) =>
-			ret(path)
-		)
+		ipcRenderer.on("collect-save-dialog", (event, path) => ret(path))
 	);
 	if (result) {
 		filePath = result;
@@ -43,7 +41,7 @@ function loadProject() {
 	});
 }
 async function openProject() {
-	ipcRenderer.send("show-open-dialog", filePath);
+	ipcRenderer.send("show-open-dialog", filePath, localStorage.getItem("lang") || "en_us");
 	var path = await new Promise(ret =>
 		ipcRenderer.on("collect-open-dialog", (event, path) =>
 			ret(path)

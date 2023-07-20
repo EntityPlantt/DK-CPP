@@ -361,6 +361,7 @@
     <Content Include="elevate.exe" />
     <Content Include="icon.ico" />
     <Content Include="lang\en_us.json" />
+    <Content Include="lang\mk_mk.json" />
     <Content Include="LICENSE.md" />
     <Content Include="package-lock.json" />
     <Content Include="package.json" />

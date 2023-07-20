@@ -1,4 +1,11 @@
 {
+  "dialog.button.open": "Open",
+  "dialog.button.save": "Save",
+  "dialog.title.open": "Open C++ File",
+  "dialog.title.save": "Save C++ File",
+  "dialog.type.any": "Any file",
+  "dialog.type.header": "C++ Header",
+  "dialog.type.source": "C++ Source",
   "fassoc.cancel": "Ask later",
   "fassoc.confirm": "Associate",
   "fassoc.disclaimer": "Known bugs: Actually clicking on the file doesn't work, this is just system association. To open files with double click, manually set this program to open the file types you want to.",
