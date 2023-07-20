@@ -76,3 +76,4 @@ exec(`del ${join(__dirname, "run.bat")}`, (error, stdout, stderr) => {
 I have some files in this project that I've downloaded without attribution, specifically these:
 - [`elevate.exe`](https://github.com/jpassing/elevate) (MIT License)
 - [`ace-builds`](https://npm.im/ace-builds) (All rights reserved)
+- [`resources/language.png`](https://www.vecteezy.com/free-png/globe) (Free License)

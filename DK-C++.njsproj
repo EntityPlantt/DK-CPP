@@ -372,6 +372,7 @@
     <Content Include="renderer.js" />
     <Content Include="installer.js" />
     <Content Include="resources\installer-background.jpg" />
+    <Content Include="resources\language.png" />
     <Content Include="resources\run-as-admin.png" />
   </ItemGroup>
   <ItemGroup>
