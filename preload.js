@@ -217,7 +217,7 @@ function checkForErrors() {
 		else {
 			exposedVariables.setBuildLog(locale["log.auto_check.ok"]);
 		}
-		exposedVariables.setBuildLogError(!!error);
+		exposedVariables.setBuildLogError(!!err);
 		exposedVariables.updateErrors(filePath);
 	});
 }
