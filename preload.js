@@ -83,7 +83,8 @@ function loadCallback() {
 	}
 	oncontextmenu = event => {
 		event.preventDefault();
-		ipcRenderer.send("show-context-menu", localStorage.getItem("lang") || "en_us");
+		ipcRenderer.send("show-context-menu", localStorage.getItem("lang") || "en_us",
+			/^[\w:]+$/.test(exposedVariables.getSelectedText()) ? exposedVariables.getSelectedText() : "");
 	};
 	onclick = event => {
 		if (event.target.parentElement.id == "autocomplete") {
@@ -238,8 +239,8 @@ function langChange(target) {
 	ipcRenderer.send("update-menu-bar", target.value);
 	location.reload();
 }
-ipcRenderer.on("menu-action", (_event, action) => {
-	switch (action) {
+ipcRenderer.on("menu-action", (_event, ...param) => {
+	switch (param[0]) {
 		case "new": exec(`start "" "${ipcRenderer.sendSync("get-path", "exe")}"`); break;
 		case "open": openProject(); break;
 		case "save": saveProject(); break;

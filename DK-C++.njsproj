@@ -369,6 +369,7 @@
     <Content Include="app.js" />
     <Content Include="preload.js" />
     <Content Include="index.html" />
+    <Content Include="reference.js" />
     <Content Include="renderer.js" />
     <Content Include="installer.js" />
     <Content Include="resources\installer-background.jpg" />

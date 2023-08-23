@@ -1,4 +1,4 @@
-onload = () => {
+addEventListener("DOMContentLoaded", () => {
 	localizeEditor();
 	setZoom(parseInt(localStorage.getItem("app-settings-zoom")) || 1);
 	updateZoom();
@@ -78,6 +78,7 @@ onload = () => {
 	sendOverBridge("autocomplete", autocomplete);
 	sendOverBridge("autocompleteOptions", autocompleteOptions);
 	sendOverBridge("goTo", goTo);
+	sendOverBridge("getSelectedText", () => editor.getSelectedText());
 	var editorCursor, lastInput;
 	document.getElementById("main").addEventListener("keyup", event => {
 		if (localStorage.getItem("auto-check") == "true") {
@@ -126,7 +127,7 @@ onload = () => {
 		editorCursor = editor.selection.getCursor();
 	});
 	loadCallback();
-}
+});
 function updateErrors(filePath) {
 	if (!filePath) {
 		editor.session.setAnnotations([]);

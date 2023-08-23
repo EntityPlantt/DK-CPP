@@ -67,7 +67,7 @@ const getMenuTemplate = (lang, webc) => {
 		}
 	}
 	return t;
-}, getContextMenuTemplate = (lang, webc) => {
+}, getContextMenuTemplate = (lang, refword, webc) => {
 	var l = require(path.join(__dirname, "lang", lang)), t = [
 		{ label: l["menu.selectall"], role: "selectAll" },
 		{ label: l["menu.cut"], role: "cut" },
@@ -79,7 +79,11 @@ const getMenuTemplate = (lang, webc) => {
 		{ label: l["menu.buildandrun"], action: "build-and-run" },
 		{ label: l["menu.checkforerrors"], action: "check-for-errors" }
 	];
-	const itemClick = x => webc.send("menu-action", x.action);
+	if (refword) {
+		t.push({ type: "separator" });
+		t.push({ label: l["menu.reference"].replaceAll("%1", refword), click: x => createReferenceWindow(x.refword), refword });
+	}
+	const itemClick = x => webc.send("menu-action", x.action, ...x.param);
 	for (var item of t) {
 		if (item.action) {
 			item.click = itemClick;
@@ -110,9 +114,7 @@ function createWindow() {
 		width: 1280,
 		height: 720,
 		show: false,
-		webPreferences: {
-			preload: path.join(__dirname, "preload.js")
-		},
+		webPreferences: { preload: path.join(__dirname, "preload.js") },
 		backgroundColor: "#0b0b0b"
 	});
 	win.maximize();
@@ -120,6 +122,18 @@ function createWindow() {
 	win.webContents.on("did-finish-load", () => {
 		win.show();
 	});
+	return win;
+}
+function createReferenceWindow(query) {
+	const win = new BrowserWindow({
+		width: 1024,
+		height: 576,
+		backgroundColor: "#fff",
+		webPreferences: { preload: path.join(__dirname, "reference.js") },
+		title: query + " - cplusplus.com"
+	});
+	win.loadURL("https://cplusplus.com/" + query);
+	win.setMenu(Menu.buildFromTemplate([]));
 	return win;
 }
 app.whenReady().then(() => {
@@ -159,8 +173,8 @@ ipcMain.on("show-save-dialog", (event, filePath, lang) => {
 });
 ipcMain.on("get-path", (event, name) => event.returnValue = app.getPath(name));
 ipcMain.on("get-process-argv", event => event.returnValue = process.argv);
-ipcMain.on("show-context-menu", (event, lang) => {
-	Menu.buildFromTemplate(getContextMenuTemplate(lang, event.sender)).popup(BrowserWindow.fromWebContents(event.sender));
+ipcMain.on("show-context-menu", (event, lang, refword) => {
+	Menu.buildFromTemplate(getContextMenuTemplate(lang, refword, event.sender)).popup(BrowserWindow.fromWebContents(event.sender));
 });
 ipcMain.on("update-menu-bar", (event, lang) => {
 	window.setMenu(Menu.buildFromTemplate(getMenuTemplate(lang, event.sender)));

@@ -43,6 +43,7 @@
   "menu.paste": "Paste",
   "menu.project": "Project",
   "menu.redo": "Redo",
+  "menu.reference": "Look up \"%1\" on C++ Reference (cplusplus.com)",
   "menu.reload": "Reload Page",
   "menu.run": "Run",
   "menu.save": "Save",
