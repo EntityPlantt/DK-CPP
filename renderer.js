@@ -89,12 +89,12 @@ addEventListener("DOMContentLoaded", () => {
 				}
 			}, 5000);
 		}
-		if (/^(\w|Backspace|Arrow(Up|Down)|Tab|\t)$/.test(event.key) && !(event.ctrlKey || event.altKey || event.shiftKey || event.metaKey)) {
+		if (/^(\w|Backspace|Arrow(Up|Down)|Tab|\t)$/.test(event.key) && !(event.ctrlKey || event.altKey || event.metaKey)) {
 			if (/^(\w|Backspace)$/.test(event.key)) {
 				const word = editor.session.getTextRange(getEditorWordRange());
 				var autocomp = editor.getValue().split(/\b/);
 				autocomp = [...new Set(autocomp.filter(x => /^\w+$/.test(x)))].sort();
-				autocompleteOptions(autocomp.filter(x => x.includes(word) && x != word));
+				autocompleteOptions(autocomp.filter(x => new RegExp(word, "i").test(x) && x != word));
 			}
 		}
 		else {
