@@ -89,12 +89,14 @@ addEventListener("DOMContentLoaded", () => {
 				}
 			}, 5000);
 		}
-		if (/^(\w|Backspace|Arrow(Up|Down)|Tab|\t)$/.test(event.key) && !(event.ctrlKey || event.altKey || event.metaKey)) {
-			if (/^(\w|Backspace)$/.test(event.key)) {
+		if (/^(\w|Backspace|Arrow(Up|Down)|Tab|\t|Shift)$/.test(event.key) && !(event.ctrlKey || event.altKey || event.metaKey)) {
+			if (/^(\w|Backspace|Shift)$/.test(event.key)) {
 				const word = editor.session.getTextRange(getEditorWordRange());
-				var autocomp = editor.getValue().split(/\b/);
-				autocomp = [...new Set(autocomp.filter(x => /^\w+$/.test(x)))].sort();
-				autocompleteOptions(autocomp.filter(x => new RegExp(word, "i").test(x) && x != word));
+				if (word.length) {
+					var autocomp = editor.getValue().split(/\b/);
+					autocomp = [...new Set(autocomp.filter(x => /^\w+$/.test(x)))].sort();
+					autocompleteOptions(autocomp.filter(x => new RegExp(word, "i").test(x) && x != word));
+				}
 			}
 		}
 		else {
@@ -184,7 +186,13 @@ function setEditorValue(data, keepHistory) {
 }
 function autocomplete(text) {
 	if (!text) text = document.querySelector("#autocomplete > li.selected").innerText;
-	editor.session.replace(getEditorWordRange(), text);
+	var wrange = getEditorWordRange();
+	if (editor.session.getTextRange(wrange) == text.substring(0, wrange.end.column - wrange.start.column)) {
+		editor.insert(text.substring(wrange.end.column - wrange.start.column));
+	}
+	else {
+		editor.session.replace(wrange, text);
+	}
 }
 function autocompleteOptions(arr) {
 	document.getElementById("autocomplete").innerHTML = arr.map(x => `<li>${x}</li>`).join("");
