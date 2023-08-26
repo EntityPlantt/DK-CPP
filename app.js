@@ -86,6 +86,7 @@ const getMenuTemplate = (lang, webc) => {
 	const itemClick = x => webc.send("menu-action", x.action, ...x.param);
 	for (var item of t) {
 		if (item.action) {
+			if (!item.param) item.param = [];
 			item.click = itemClick;
 		}
 	}
