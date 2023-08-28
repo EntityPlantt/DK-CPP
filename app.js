@@ -124,7 +124,7 @@ function createWindow() {
 	});
 	win.maximize();
 	win.loadFile("index.html");
-	win.webContents.on("did-finish-load", () => {
+	win.on("ready-to-show", () => {
 		win.show();
 	});
 	win.on("close", e => {
@@ -164,10 +164,12 @@ function createReferenceWindow(query) {
 		height: 576,
 		backgroundColor: "#fff",
 		webPreferences: { preload: path.join(__dirname, "reference.js") },
-		title: query + " - cplusplus.com"
+		title: query + " - cplusplus.com",
+		show: false
 	});
 	win.loadURL("https://cplusplus.com/" + query);
 	win.setMenu(Menu.buildFromTemplate([]));
+	win.on("ready-to-show", () => win.show());
 	return win;
 }
 app.whenReady().then(() => {
