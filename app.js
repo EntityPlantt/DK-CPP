@@ -1,4 +1,5 @@
 const { app, BrowserWindow, dialog, ipcMain, Menu } = require("electron"), path = require("path"), child_process = require("child_process");
+var dialogsOpen = 0;
 const getMenuTemplate = (lang, webc) => {
 	var l = require(path.join(__dirname, "lang", lang)), t = [
 		{
@@ -7,8 +8,8 @@ const getMenuTemplate = (lang, webc) => {
 				{ label: l["menu.new"], action: "new", accelerator: "CmdOrCtrl+N" },
 				{ type: "separator" },
 				{ label: l["menu.open"], action: "open", accelerator: "CmdOrCtrl+O" },
-				{ label: l["menu.save"], action: "save", accelerator: "CmdOrCtrl+S" },
-				{ label: l["menu.saveas"], action: "save-as", accelerator: "CmdOrCtrl+Shift+S" },
+				{ label: l["menu.save"], action: "save", accelerator: "CmdOrCtrl+S", param: [false] },
+				{ label: l["menu.saveas"], action: "save-as", accelerator: "CmdOrCtrl+Shift+S", param: [false] },
 				{ type: "separator" },
 				{ label: l["menu.settings"], action: "settings", accelerator: "CmdOrCtrl+`" }
 			]
@@ -58,7 +59,10 @@ const getMenuTemplate = (lang, webc) => {
 			]
 		}
 	];
-	const itemClick = x => webc.send("menu-action", x.action);
+	const itemClick = x => {
+		if (x.param) webc.send("menu-action", x.action, ...x.param);
+		else webc.send("menu-action", x.action);
+	};
 	for (var subm of t) {
 		for (var item of subm.submenu) {
 			if (item.action) {
@@ -123,6 +127,35 @@ function createWindow() {
 	win.webContents.on("did-finish-load", () => {
 		win.show();
 	});
+	win.on("close", e => {
+		e.preventDefault();
+		e.returnValue = false;
+		ipcMain.once("can-close", (_ev, lang, ok) => {
+			var l = require(path.join(__dirname, "lang", lang));
+			if (ok) {
+				process.exit();
+			}
+			else {
+				switch (dialog.showMessageBoxSync(win, {
+					title: l["titlebar.unsaved"],
+					message: l["message.unsaved"],
+					type: "warning",
+					buttons: [l["menu.save"], l["menu.dontsave"], l["menu.cancel"]],
+					defaultId: 0,
+					cancelId: 2,
+					noLink: true
+				})) {
+					case 0:
+						win.webContents.send("menu-action", "save", true);
+						break;
+					case 1:
+						process.exit();
+						break;
+				}
+			}
+		});
+		win.webContents.send("can-close");
+	});
 	return win;
 }
 function createReferenceWindow(query) {
@@ -151,6 +184,7 @@ app.on("window-all-closed", () => {
 	}
 });
 ipcMain.on("show-open-dialog", (event, filePath, lang) => {
+	dialogsOpen++;
 	var l = require(path.join(__dirname, "lang", lang));
 	var result = dialog.showOpenDialogSync(window, {
 		defaultPath: filePath,
@@ -160,8 +194,10 @@ ipcMain.on("show-open-dialog", (event, filePath, lang) => {
 		filters: getFileTypes(lang)
 	});
 	event.reply("collect-open-dialog", result ? result[0] : result);
+	dialogsOpen--;
 });
 ipcMain.on("show-save-dialog", (event, filePath, lang) => {
+	dialogsOpen++;
 	var l = require(path.join(__dirname, "lang", lang));
 	var result = dialog.showSaveDialogSync(window, {
 		defaultPath: filePath,
@@ -171,6 +207,7 @@ ipcMain.on("show-save-dialog", (event, filePath, lang) => {
 		filters: getFileTypes(lang)
 	});
 	event.reply("collect-save-dialog", result);
+	dialogsOpen--;
 });
 ipcMain.on("get-path", (event, name) => event.returnValue = app.getPath(name));
 ipcMain.on("get-process-argv", event => event.returnValue = process.argv);
@@ -180,6 +217,7 @@ ipcMain.on("show-context-menu", (event, lang, refword) => {
 ipcMain.on("update-menu-bar", (event, lang) => {
 	window.setMenu(Menu.buildFromTemplate(getMenuTemplate(lang, event.sender)));
 });
+ipcMain.on("exit", () => process.exit());
 function handleSquirrelEvent() {
 	if (process.argv.length == 1) {
 		return false;

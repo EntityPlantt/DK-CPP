@@ -1,33 +1,32 @@
 const { contextBridge, ipcRenderer, shell } = require("electron"), { writeFile, readFile, writeFileSync, readdirSync } = require("fs"),
 	{ exec } = require("child_process"), { join } = require("path");
-var filePath = "", exposedVariables = new Object, zoom = 1, locale = new Object;
-function saveProject() {
-	if (!filePath.length) {
-		saveAsProject();
+var filePath = "", exposedVariables = {}, zoom = 1, locale = {}, savedValue = "";
+function saveProject(closeAfter = false) {
+	if (filePath == locale["titlebar.untitled"]) {
+		saveAsProject(closeAfter);
 		return;
 	}
-	writeFile(filePath, exposedVariables.editorValue(), { encoding: "utf-8" }, async (err) => {
+	writeFile(filePath, exposedVariables.editorValue(), { encoding: "utf-8" }, err => {
 		if (err) {
-			await saveAsProject();
+			saveAsProject(closeAfter);
+			return;
+		}
+		if (closeAfter) {
+			ipcRenderer.send("exit");
 		}
 		return err;
 	});
-	document.title = `${locale["ui.saved"]} ${filePath} - DK-C++`;
-	var oldFilePath = filePath;
-	setTimeout(() => {
-		if (oldFilePath == filePath) {
-			document.title = filePath + " - DK-C++";
-		}
-	}, 2500);
+	savedValue = exposedVariables.editorValue();
+	document.title = `${filePath} - DK-C++`;
 }
-async function saveAsProject() {
+async function saveAsProject(closeAfter = false) {
 	ipcRenderer.send("show-save-dialog", filePath, localStorage.getItem("lang") || "en_us");
 	var result = await new Promise(ret =>
-		ipcRenderer.on("collect-save-dialog", (event, path) => ret(path))
+		ipcRenderer.once("collect-save-dialog", (event, path) => ret(path))
 	);
 	if (result) {
 		filePath = result;
-		saveProject();
+		saveProject(closeAfter);
 	}
 }
 function loadProject() {
@@ -38,6 +37,7 @@ function loadProject() {
 		}
 		document.title = filePath + " - DK-C++";
 		exposedVariables.setEditorValue(data);
+		savedValue = data;
 	});
 }
 async function openProject() {
@@ -207,7 +207,7 @@ function updateZoom() {
 	});
 }
 function checkForErrors() {
-	if (!filePath) return;
+	if (filePath == l["titlebar.untitled"]) return;
 	saveProject();
 	exec(`g++ "${filePath}" -fsyntax-only -Wpedantic -Wall -Wextra`, (err, stdout, stderr) => {
 		if (stderr) {
@@ -233,18 +233,28 @@ function localizeEditor() {
 	text = text.replaceAll(/{{(.*?)}}/g, (str, key) => locale[key]);
 	document.body.innerHTML = text;
 	ipcRenderer.send("update-menu-bar", localStorage.getItem("lang") || "en_us");
+	if (!filePath.length) filePath = locale["titlebar.untitled"];
+	document.title = filePath + " - DK-C++";
 }
 function langChange(target) {
 	localStorage.setItem("lang", target.value);
 	ipcRenderer.send("update-menu-bar", target.value);
 	location.reload();
 }
+function editorChange(value) {
+	if (savedValue == value) {
+		document.title = `${filePath} - DK-C++`;
+	}
+	else {
+		document.title = `\u2022 ${filePath} - DK-C++`;
+	}
+}
 ipcRenderer.on("menu-action", (_event, ...param) => {
 	switch (param[0]) {
 		case "new": exec(`start "" "${ipcRenderer.sendSync("get-path", "exe")}"`); break;
 		case "open": openProject(); break;
-		case "save": saveProject(); break;
-		case "save-as": saveAsProject(); break;
+		case "save": saveProject(param[1]); break;
+		case "save-as": saveAsProject(param[1]); break;
 		case "check-for-errors": checkForErrors(); break;
 		case "build": buildProject(); break;
 		case "run": runProject(); break;
@@ -258,6 +268,7 @@ ipcRenderer.on("menu-action", (_event, ...param) => {
 		case "reload": location.reload(); break;
 	}
 });
+ipcRenderer.on("can-close", () => ipcRenderer.sendSync("can-close", localStorage.getItem("lang") || "en_us", savedValue == exposedVariables.editorValue()));
 contextBridge.exposeInMainWorld("saveProject", saveProject);
 contextBridge.exposeInMainWorld("saveAsProject", saveAsProject);
 contextBridge.exposeInMainWorld("loadProject", loadProject);
@@ -273,6 +284,7 @@ contextBridge.exposeInMainWorld("checkForErrors", checkForErrors);
 contextBridge.exposeInMainWorld("closeSettings", closeSettings);
 contextBridge.exposeInMainWorld("localizeEditor", localizeEditor);
 contextBridge.exposeInMainWorld("langChange", langChange);
+contextBridge.exposeInMainWorld("editorChange", editorChange);
 contextBridge.exposeInMainWorld("sendOverBridge", (apiKey, api) => {
 	exposedVariables[apiKey] = api;
 });

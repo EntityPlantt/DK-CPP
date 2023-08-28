@@ -81,6 +81,7 @@ addEventListener("DOMContentLoaded", () => {
 	sendOverBridge("getSelectedText", () => editor.getSelectedText());
 	var editorCursor, lastInput;
 	document.getElementById("main").addEventListener("keyup", event => {
+		editorChange(editor.getValue());
 		if (localStorage.getItem("auto-check") == "true") {
 			lastInput = Date.now();
 			setTimeout(() => {
