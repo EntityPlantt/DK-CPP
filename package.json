@@ -22,14 +22,14 @@
     "gcc",
     "gnu-gcc",
     "electron",
-    "windows"
+    "windows",
+    "linux"
   ],
   "dependencies": {
     "electron": "^19.1.9"
   },
   "devDependencies": {
-    "electron": "^19.1.9",
-    "electron-packager": "^15.5.1",
+    "electron-packager": "^15.5.2",
     "electron-wix-msi": "^5.0.0"
   }
 }
