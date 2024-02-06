@@ -231,13 +231,13 @@
 			for="file-assoc-hpp">{{fassoc.type.hpp}}</label><br />
 		<input id="file-assoc-h++" type="checkbox" /> <label
 			for="file-assoc-h++">{{fassoc.type.h++}}</label><br /><br />
-		<button onclick="assocFile()">{{fassoc.confirm}} <img src="resources/run-as-admin.png" height="18"
+		<button onclick="assocFile()">{{fassoc.confirm}} <img src="../resources/run-as-admin.png" height="18"
 				ondragstart="return false" /></button> <button onclick="assocFile(false)">{{fassoc.dontask}}</button>
 		<button onclick="assocFile(false, true)">{{fassoc.cancel}}</button>
 		<br /><br /><i>{{fassoc.disclaimer}}</i>
 	</div>
 	<div id="settings" style="display:none">
-		<img src="resources/language.png" width="20" height="20" ondragstart="return false" /> <select id="lang"
+		<img src="../resources/language.png" width="20" height="20" ondragstart="return false" /> <select id="lang"
 			onchange="langChange(this)"></select><br />
 		<br /><input type="checkbox" id="settings-auto-check"
 			onchange="localStorage.setItem('auto-check', this.checked)" /><label

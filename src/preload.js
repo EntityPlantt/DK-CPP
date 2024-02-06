@@ -99,7 +99,7 @@ function buildProject() {
 	exposedVariables.setBuildLogError(false);
 	exposedVariables.updateErrors();
 	return new Promise(ret => {
-		exec(`g++ "${filePath}" -o "${filePath.substring(0, filePath.lastIndexOf("."))}.exe" -Wpedantic -Wall -Wextra`, (error, stdout, stderr) => {
+		exec(`g++ "${filePath}" -o "${filePath.substring(0, filePath.lastIndexOf("."))}" -Wpedantic -Wall -Wextra`, (error, stdout, stderr) => {
 			if (error) {
 				exposedVariables.setBuildLog(stderr);
 			}

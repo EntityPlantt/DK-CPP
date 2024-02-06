@@ -123,7 +123,7 @@ function createWindow() {
 		backgroundColor: "#0b0b0b"
 	});
 	win.maximize();
-	win.loadFile("index.html");
+	win.loadFile(path.join(__dirname, "index.html"));
 	win.on("ready-to-show", () => {
 		win.show();
 	});
@@ -132,9 +132,7 @@ function createWindow() {
 		e.returnValue = false;
 		ipcMain.once("can-close", (_ev, lang, ok) => {
 			var l = require(path.join(__dirname, "lang", lang));
-			if (ok) {
-				process.exit();
-			}
+			if (ok) process.exit();
 			else {
 				switch (dialog.showMessageBoxSync(win, {
 					title: l["titlebar.unsaved"],
