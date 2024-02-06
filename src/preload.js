@@ -1,5 +1,5 @@
 const { contextBridge, ipcRenderer, shell } = require("electron"), { writeFile, readFile, writeFileSync, readdirSync } = require("fs"),
-	{ exec } = require("child_process"), { join } = require("path");
+	{ exec, execSync } = require("child_process"), { join } = require("path");
 var filePath = "", exposedVariables = {}, zoom = 1, locale = {}, savedValue = "";
 function saveProject(closeAfter = false) {
 	if (filePath == locale["titlebar.untitled"]) {
@@ -104,7 +104,7 @@ function buildProject() {
 				exposedVariables.setBuildLog(stderr);
 			}
 			else {
-				exposedVariables.setBuildLog(locale["log.build.success"].replaceAll("%1", filePath.substring(0, filePath.lastIndexOf(".")) + ".exe"));
+				exposedVariables.setBuildLog(locale["log.build.success"].replaceAll("%1", filePath.substring(0, filePath.lastIndexOf(".")) + (process.platform == "win32" ? ".exe" : "")));
 			}
 			exposedVariables.setBuildLogError(!!error);
 			ret(!error);
@@ -116,31 +116,14 @@ function runProject() {
 	exposedVariables.setBuildLog(locale["log.run.start"].replaceAll("%1", filePath.substring(0, filePath.lastIndexOf(".")) + ".exe"));
 	exposedVariables.setBuildLogError(false);
 	exposedVariables.updateErrors();
-	writeFile(join(__dirname, "run.bat"), `call "${filePath.substring(0, filePath.lastIndexOf(".")) + ".exe"}"\npause\nexit`, err => {
-		if (err) {
-			exposedVariables.setBuildLog(err);
-			exposedVariables.setBuildLogError(true);
-		}
-		else {
-			exec(`start cmd /c "${join(__dirname, "run.bat")}"`, (error, stdout, stderr) => {
-				if (error) {
-					exposedVariables.setBuildLog(stderr);
-					exposedVariables.setBuildLogError(true);
-					if (confirm(locale["message.run.confirm_build"])) {
-						buildAndRunProject();
-					}
-					else {
-						exec(`del "${join(__dirname, "run.bat")}"`, (error, stdout, stderr) => {
-							if (error) {
-								exposedVariables.setBuildLog(stderr);
-								exposedVariables.setBuildLogError(true);
-							}
-							else {
-								exposedVariables.setBuildLog(locale["log.run.success"].replaceAll("%1", filePath.substring(0, filePath.lastIndexOf(".")) + ".exe"));
-								exposedVariables.setBuildLogError(false);
-							}
-						});
-					}
+	if (process.platform == "win32") {
+		writeFileSync(join(__dirname, "run.bat"), `call "${filePath.substring(0, filePath.lastIndexOf(".")) + ".exe"}"\npause\nexit`);
+		exec(`start cmd /c "${join(__dirname, "run.bat")}"`, (error, stdout, stderr) => {
+			if (error) {
+				exposedVariables.setBuildLog(stderr);
+				exposedVariables.setBuildLogError(true);
+				if (confirm(locale["message.run.confirm_build"])) {
+					buildAndRunProject();
 				}
 				else {
 					exec(`del "${join(__dirname, "run.bat")}"`, (error, stdout, stderr) => {
@@ -154,9 +137,48 @@ function runProject() {
 						}
 					});
 				}
-			});
-		}
-	});
+			}
+			else {
+				exec(`del "${join(__dirname, "run.bat")}"`, (error, stdout, stderr) => {
+					if (error) {
+						exposedVariables.setBuildLog(stderr);
+						exposedVariables.setBuildLogError(true);
+					}
+					else {
+						exposedVariables.setBuildLog(locale["log.run.success"].replaceAll("%1", filePath.substring(0, filePath.lastIndexOf(".")) + ".exe"));
+						exposedVariables.setBuildLogError(false);
+					}
+				});
+			}
+		});
+	}
+	else {
+		writeFileSync(join(__dirname, "run.sh"), `"${filePath.substring(0, filePath.lastIndexOf("."))}"\nread -p "\n\n${locale["message.terminal_pause"]}"\nexit`);
+		execSync(`chmod +x "${join(__dirname, "run.sh")}"; chmod +x "${filePath.substring(0, filePath.lastIndexOf("."))}"`);
+		exec(`gnome-terminal --wait --window -- "${join(__dirname, "run.sh")}"`, (error, stdout, stderr) => {
+			// console.log(error, stdout, stderr);
+			if (error) {
+				// execSync(`rm "${join(__dirname, "run.sh")}"`);
+				exposedVariables.setBuildLog(stderr + stdout);
+				exposedVariables.setBuildLogError(true);
+				if (confirm(locale["message.run.confirm_build"])) {
+					buildAndRunProject();
+				}
+			}
+			else {
+				exec(`rm "${join(__dirname, "run.sh")}"`, (error, stdout, stderr) => {
+					if (error) {
+						exposedVariables.setBuildLog(stderr);
+						exposedVariables.setBuildLogError(true);
+					}
+					else {
+						exposedVariables.setBuildLog(locale["log.run.success"].replaceAll("%1", filePath.substring(0, filePath.lastIndexOf("."))));
+						exposedVariables.setBuildLogError(false);
+					}
+				});
+			}
+		});
+	}
 }
 async function buildAndRunProject() {
 	if (await buildProject()) {
@@ -164,6 +186,7 @@ async function buildAndRunProject() {
 	}
 }
 async function assocFile(changeSettings = true, askLater = false) {
+	if (process.platform == "linux") return;
 	if (changeSettings) {
 		const exePath = ipcRenderer.sendSync("get-path", "exe");
 		const cfiles = [], cheaders = [], ftypeCmd = [`ftype DK-CPP.CFile="${exePath}" "%1"`, `ftype DK-CPP.Header="${exePath}" "%1"`];
@@ -178,8 +201,8 @@ async function assocFile(changeSettings = true, askLater = false) {
 		try {
 			const batch = join(__dirname, "assoc.bat");
 			writeFileSync(batch, cmd);
-			exec(`start "" "${join(__dirname, "elevate.exe")}" -wait "${batch}"`, async (error, stdout, stderr) => {
-				await exec("del " + join(__dirname, "assoc.bat"));
+			exec(`start "" "${join(__dirname, "..", "bin", "elevate.exe")}" -wait "${batch}"`, async (error, stdout, stderr) => {
+				execSync("del " + join(__dirname, "assoc.bat"));
 				exposedVariables.setBuildLog(locale["log.fassoc.success"]);
 				exposedVariables.setBuildLogError(false);
 			});
