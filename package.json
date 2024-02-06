@@ -2,15 +2,15 @@
   "name": "dk-cpp",
   "version": "1.3.2",
   "description": "A C++ IDE designed for easy use.",
-  "main": "app.js",
+  "main": "src/app.js",
   "author": {
     "name": "EntityPlantt"
   },
   "license": "SEE LICENSE IN LICENSE.md",
   "scripts": {
     "build": "npm run -s package & npm run -s installer",
-    "installer": "node installer.js",
-    "package": "npx electron-packager . \"DK-C++\" --icon=icon.ico --overwrite",
+    "installer": "node src/installer",
+    "package": "npx electron-packager . \"DK-C++\" --icon=icon.png --overwrite",
     "test": "electron ."
   },
   "tags": [
